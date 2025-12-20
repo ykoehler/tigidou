@@ -154,6 +154,17 @@ class ToolParser {
     } else if (lower == 'today') {
       return now;
     }
+
+    // YYYY-MM-DD
+    final dateMatch = RegExp(r'^(\d{4})-(\d{1,2})-(\d{1,2})$').firstMatch(data);
+    if (dateMatch != null) {
+      return DateTime(
+        int.parse(dateMatch.group(1)!),
+        int.parse(dateMatch.group(2)!),
+        int.parse(dateMatch.group(3)!),
+      );
+    }
+
     return null;
   }
 
