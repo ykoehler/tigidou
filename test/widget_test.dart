@@ -1,0 +1,204 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:tigidou/models/todo_model.dart';
+import 'package:tigidou/models/person_model.dart';
+import 'package:tigidou/providers/todo_provider.dart';
+import 'package:tigidou/providers/person_provider.dart';
+import 'package:tigidou/l10n/app_localizations.dart';
+import 'package:tigidou/screens/home_screen.dart';
+
+class MockTodoProvider extends ChangeNotifier implements TodoProvider {
+  Stream<List<Todo>> _todosStream = Stream.value([]);
+  String? lastAddedTitle;
+  DateTime? lastAddedDate;
+
+  void setTodos(List<Todo> todos) {
+    _todosStream = Stream.value(todos);
+    notifyListeners();
+  }
+
+  @override
+  Stream<List<Todo>> get todos => _todosStream;
+
+  @override
+  Future<String> addTodo(String title, DateTime? dueDate) async {
+    lastAddedTitle = title;
+    lastAddedDate = dueDate;
+    return 'new_id';
+  }
+
+  @override
+  Future<void> deleteTodo(String id) async {}
+
+  @override
+  Future<void> toggleTodoStatus(Todo todo) async {}
+
+  @override
+  Future<void> updateTodo(Todo todo) async {}
+}
+
+class MockPersonProvider extends ChangeNotifier implements PersonProvider {
+  @override
+  Stream<List<Person>> get people => Stream.value([]);
+
+  @override
+  Future<void> addPerson(String username, String displayName) async {}
+
+  @override
+  Future<void> deletePerson(String id) async {}
+}
+
+void main() {
+  testWidgets('HomeScreen displays todos and FAB', (WidgetTester tester) async {
+    final mockTodoProvider = MockTodoProvider();
+    final mockPersonProvider = MockPersonProvider();
+
+    mockTodoProvider.setTodos([
+      Todo(id: '1', title: 'Buy milk', isCompleted: false),
+      Todo(id: '2', title: 'Walk dog', isCompleted: false),
+    ]);
+
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MultiProvider(
+          providers: [
+            ChangeNotifierProvider<TodoProvider>.value(value: mockTodoProvider),
+            ChangeNotifierProvider<PersonProvider>.value(
+              value: mockPersonProvider,
+            ),
+          ],
+          child: const HomeScreen(),
+        ),
+      ),
+    );
+
+    // Wait for the stream to emit
+    await tester.pumpAndSettle();
+
+    // Verify that the title is present.
+    expect(find.text('Todos'), findsOneWidget);
+
+    // Verify that todos are displayed.
+    expect(find.text('Buy milk', findRichText: true), findsOneWidget);
+    expect(find.text('Walk dog', findRichText: true), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget); // Search bar
+  });
+
+  testWidgets('Search bar filters todos', (WidgetTester tester) async {
+    final mockTodoProvider = MockTodoProvider();
+    final mockPersonProvider = MockPersonProvider();
+
+    // Mock initial data
+    mockTodoProvider.setTodos([
+      Todo(id: '1', title: 'Buy milk', isCompleted: false),
+      Todo(id: '2', title: 'Walk dog', isCompleted: false),
+    ]);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MultiProvider(
+          providers: [
+            ChangeNotifierProvider<TodoProvider>.value(value: mockTodoProvider),
+            ChangeNotifierProvider<PersonProvider>.value(
+              value: mockPersonProvider,
+            ),
+          ],
+          child: const HomeScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify initial state
+    expect(find.text('Buy milk', findRichText: true), findsOneWidget);
+    expect(find.text('Walk dog', findRichText: true), findsOneWidget);
+
+    // Enter text
+    await tester.enterText(find.byType(TextField), 'milk');
+    await tester.pumpAndSettle(); // Wait for rebuild
+
+    // Verify filtering
+    expect(find.text('Buy milk', findRichText: true), findsOneWidget);
+    expect(find.text('Walk dog', findRichText: true), findsNothing);
+  });
+
+  testWidgets('Search bar adds todo on submit', (WidgetTester tester) async {
+    final mockTodoProvider = MockTodoProvider();
+    final mockPersonProvider = MockPersonProvider();
+
+    mockTodoProvider.setTodos([]);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MultiProvider(
+          providers: [
+            ChangeNotifierProvider<TodoProvider>.value(value: mockTodoProvider),
+            ChangeNotifierProvider<PersonProvider>.value(
+              value: mockPersonProvider,
+            ),
+          ],
+          child: const HomeScreen(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Enter text and submit
+    await tester.enterText(find.byType(TextField), 'New Task');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+
+    // Verify addTodo called
+    expect(mockTodoProvider.lastAddedTitle, 'New Task');
+
+    // Verify text cleared (requires pump and state update)
+    expect(find.text('New Task'), findsNothing);
+  });
+
+  testWidgets('Live preview shows draft todo', (WidgetTester tester) async {
+    final mockTodoProvider = MockTodoProvider();
+    final mockPersonProvider = MockPersonProvider();
+
+    mockTodoProvider.setTodos([]);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MultiProvider(
+          providers: [
+            ChangeNotifierProvider<TodoProvider>.value(value: mockTodoProvider),
+            ChangeNotifierProvider<PersonProvider>.value(
+              value: mockPersonProvider,
+            ),
+          ],
+          child: const HomeScreen(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Enter text that doesn't match anything
+    await tester.enterText(find.byType(TextField), 'Call @mom');
+    await tester.pumpAndSettle();
+
+    // Verify "New Todo Preview" header
+    expect(find.text('New Todo Preview'), findsOneWidget);
+
+    // Verify draft todo is displayed
+    // We look for the text in the RichText
+    expect(find.text('Call @mom', findRichText: true), findsOneWidget);
+
+    // Verify it's read-only (delete button shouldn't be there)
+    expect(find.byIcon(Icons.delete), findsNothing);
+  });
+}

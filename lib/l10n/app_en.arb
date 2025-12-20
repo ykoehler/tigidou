@@ -1,0 +1,60 @@
+{
+  "appTitle": "Tigidou",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "todos": "Todos",
+  "@todos": {
+    "description": "Label for the todos tab"
+  },
+  "people": "People",
+  "@people": {
+    "description": "Label for the people tab"
+  },
+  "addTodo": "Add Todo",
+  "@addTodo": {
+    "description": "Tooltip for adding a todo"
+  },
+  "searchHint": "Search or add todo...",
+  "newTodoPreview": "New Todo Preview",
+  "createTodo": "Create new todo",
+  "noTodos": "No todos yet. Add one!",
+  "addTodoDialogTitle": "Add Todo",
+  "addTodoHint": "Enter todo (e.g., \"Call dad @tomorrow @14h\")",
+  "cancel": "Cancel",
+  "add": "Add",
+  "error": "Error: {message}",
+  "@error": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "noPeople": "No people yet. Add one!",
+  "addPersonDialogTitle": "Add Person",
+  "usernameHint": "Username (e.g. father)",
+  "displayNameHint": "Display Name (e.g. Dad)",
+  "noAssociatedTodos": "No associated todos.",
+  "somethingWentWrong": "Something went wrong",
+  "due": "Due: {date}",
+  "@due": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reminder": "Reminder: 5 mins before",
+  "setDueDate": "Set Due Date",
+  "reminderSetDateFirst": "Reminder: (Set date first)",
+  "unknownTagFormat": "Unknown tag format",
+  "addPersonWithUsername": "Add Person: @{username}",
+  "@addPersonWithUsername": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  }
+}
