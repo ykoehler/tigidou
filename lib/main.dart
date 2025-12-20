@@ -23,8 +23,12 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   if (const bool.fromEnvironment('USE_FIREBASE_EMULATOR')) {
-    await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
-    // Add other emulators here if needed
+    // For Android emulators, we need to use 10.0.2.2 instead of localhost
+    const host = String.fromEnvironment(
+      'FIREBASE_EMULATOR_HOST',
+      defaultValue: 'localhost',
+    );
+    await FirebaseAuth.instance.useAuthEmulator(host, 9099);
   }
 
   runApp(const MyApp());

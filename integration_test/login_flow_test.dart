@@ -4,9 +4,7 @@ import 'package:tigidou/main.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
 
 void main() {
-  patrolTest('counter state is retained when navigating sequence of screens', (
-    $,
-  ) async {
+  patrolTest('verify login and registration flow navigation', ($) async {
     await $.pumpWidgetAndSettle(const MyApp());
 
     // Use l10n to find widgets

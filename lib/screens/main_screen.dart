@@ -51,11 +51,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors
-            .transparent, // Transparent for gradient effect? Or semi-transparent?
-        // Actually BottomNavigationBar needs a background usually or it blends weirdly if body renders behind it.
-        // But GradientScaffold body has the gradient.
-        // Let's use a semi-transparent background for nav bar.
+        backgroundColor: Colors.transparent,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
         unselectedItemColor: Colors.white60,

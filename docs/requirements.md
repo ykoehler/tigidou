@@ -5,7 +5,7 @@
 
 ## GitHub Project
 > [!NOTE]
-> Project management and task tracking for this application are handled in key: [LINK_NEEDED]
+> Project management and task tracking for this application are handled in: [ykoehler/tigidou](https://github.com/ykoehler/tigidou)
 
 ## Current Feature Set
 
