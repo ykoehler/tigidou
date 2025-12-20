@@ -150,11 +150,13 @@ class _TodoListItemState extends State<TodoListItem> {
                                         firstDate: DateTime.now(),
                                         lastDate: DateTime(2100),
                                       );
+                                      if (!context.mounted) return;
                                       if (date != null) {
                                         final time = await showTimePicker(
                                           context: context,
                                           initialTime: TimeOfDay.now(),
                                         );
+                                        if (!context.mounted) return;
                                         if (time != null) {
                                           final newDueDate = DateTime(
                                             date.year,
@@ -372,11 +374,13 @@ class _TodoListItemState extends State<TodoListItem> {
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
+    if (!context.mounted) return;
     if (date != null) {
       final time = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
       );
+      if (!context.mounted) return;
       if (time != null) {
         final newDueDate = DateTime(
           date.year,
