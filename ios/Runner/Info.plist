@@ -50,5 +50,7 @@
 	</array>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>We need notifications to remind you of your tasks.</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 </dict>
 </plist>

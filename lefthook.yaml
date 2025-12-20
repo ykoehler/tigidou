@@ -1,0 +1,10 @@
+pre-commit:
+  commands:
+    tests:
+      run: flutter test
+      all_files: true
+
+test:all:
+  commands:
+    run:
+      run: ./scripts/run_all_tests.sh

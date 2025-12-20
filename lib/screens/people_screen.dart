@@ -5,6 +5,7 @@ import '../providers/todo_provider.dart';
 import '../models/person_model.dart';
 import '../models/todo_model.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
+import '../widgets/gradient_scaffold.dart';
 
 class PeopleScreen extends StatelessWidget {
   const PeopleScreen({super.key});
@@ -12,7 +13,7 @@ class PeopleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
+    return GradientScaffold(
       appBar: AppBar(title: Text(l10n.people)),
       body: Consumer<PersonProvider>(
         builder: (context, personProvider, child) {

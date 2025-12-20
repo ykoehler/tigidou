@@ -1,0 +1,6 @@
+patrol:
+  app_name: Tigidou
+  android:
+    package_name: com.yannickkoehler.tigidou
+  ios:
+    bundle_identifier: com.yannickkoehler.tigidou
