@@ -5,6 +5,7 @@ import '../providers/todo_provider.dart';
 import '../widgets/todo_list_item.dart';
 import '../utils/tool_parser.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
+import '../widgets/gradient_scaffold.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -36,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
+    return GradientScaffold(
       appBar: AppBar(title: Text(l10n.todos)),
       body: Column(
         children: [
