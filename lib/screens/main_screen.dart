@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'people_screen.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
 
 class MainScreen extends StatefulWidget {
@@ -26,7 +28,20 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.appTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              Provider.of<AuthProvider>(context, listen: false).signOut();
+            },
+            tooltip: l10n.logout,
+          ),
+        ],
+      ),
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[

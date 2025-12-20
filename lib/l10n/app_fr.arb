@@ -23,5 +23,19 @@
   "setDueDate": "Définir l'échéance",
   "reminderSetDateFirst": "Rappel : (Définir la date d'abord)",
   "unknownTagFormat": "Format de tag inconnu",
-  "addPersonWithUsername": "Ajouter une personne : @{username}"
+  "addPersonWithUsername": "Ajouter une personne : @{username}",
+  "login": "Connexion",
+  "email": "Email",
+  "password": "Mot de passe",
+  "confirmPassword": "Confirmer le mot de passe",
+  "createAccount": "Créer un compte",
+  "register": "S'inscrire",
+  "noAccount": "Pas de compte ? Inscrivez-vous",
+  "alreadyHaveAccount": "Déjà un compte ? Connectez-vous",
+  "logout": "Déconnexion",
+  "invalidEmail": "Veuillez entrer un email valide",
+  "emptyEmail": "Veuillez entrer votre email",
+  "emptyPassword": "Veuillez entrer votre mot de passe",
+  "passwordTooShort": "Le mot de passe doit comporter au moins 6 caractères",
+  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas"
 }

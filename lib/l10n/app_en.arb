@@ -50,11 +50,18 @@
   "reminderSetDateFirst": "Reminder: (Set date first)",
   "unknownTagFormat": "Unknown tag format",
   "addPersonWithUsername": "Add Person: @{username}",
-  "@addPersonWithUsername": {
-    "placeholders": {
-      "username": {
-        "type": "String"
-      }
-    }
-  }
+  "login": "Login",
+  "email": "Email",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "createAccount": "Create Account",
+  "register": "Register",
+  "noAccount": "Don't have an account? Sign Up",
+  "alreadyHaveAccount": "Already have an account? Login",
+  "logout": "Logout",
+  "invalidEmail": "Please enter a valid email",
+  "emptyEmail": "Please enter your email",
+  "emptyPassword": "Please enter your password",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "passwordsDoNotMatch": "Passwords do not match"
 }
