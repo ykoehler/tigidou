@@ -1,4 +1,7 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart' as fln;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
+    as fln;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -22,25 +25,31 @@ class NotificationService {
 
     final fln.DarwinInitializationSettings initializationSettingsDarwin =
         fln.DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
 
-    final fln.InitializationSettings initializationSettings = fln.InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-      macOS: initializationSettingsDarwin,
-    );
+    final fln.InitializationSettings initializationSettings =
+        fln.InitializationSettings(
+          android: initializationSettingsAndroid,
+          iOS: initializationSettingsDarwin,
+          macOS: initializationSettingsDarwin,
+        );
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
   Future<void> scheduleNotification(
-      int id, String title, DateTime scheduledTime) async {
+    int id,
+    String title,
+    DateTime scheduledTime,
+  ) async {
     try {
       // Schedule 5 minutes before
-      final notificationTime = scheduledTime.subtract(const Duration(minutes: 5));
+      final notificationTime = scheduledTime.subtract(
+        const Duration(minutes: 5),
+      );
 
       if (notificationTime.isBefore(DateTime.now())) {
         // If the time is already passed, don't schedule
@@ -66,7 +75,7 @@ class NotificationService {
         androidScheduleMode: fln.AndroidScheduleMode.exactAllowWhileIdle,
       );
     } catch (e) {
-      print('Error scheduling notification: $e');
+      debugPrint('Error scheduling notification: $e');
     }
   }
 
