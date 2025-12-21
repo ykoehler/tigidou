@@ -63,5 +63,10 @@
   "emptyEmail": "Please enter your email",
   "emptyPassword": "Please enter your password",
   "passwordTooShort": "Password must be at least 6 characters",
-  "passwordsDoNotMatch": "Passwords do not match"
+  "passwordsDoNotMatch": "Passwords do not match",
+  "forgotPassword": "Forgot Password?",
+  "resetPassword": "Reset Password",
+  "sendResetEmail": "Send Reset Email",
+  "passwordResetSent": "Password reset email sent!",
+  "backToLogin": "Back to Login"
 }

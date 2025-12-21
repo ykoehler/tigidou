@@ -50,6 +50,19 @@ class AuthProvider with ChangeNotifier {
     await _authService.signOut();
   }
 
+  Future<void> sendPasswordResetEmail(String email) async {
+    _setLoading(true);
+    _clearError();
+    try {
+      await _authService.sendPasswordResetEmail(email);
+    } catch (e) {
+      _setError(e.toString());
+      rethrow;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();

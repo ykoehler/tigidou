@@ -4,8 +4,15 @@ import '../models/todo_model.dart';
 import '../models/person_model.dart';
 
 class DatabaseService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore get _firestore {
+    print('DEBUG: Accessing FirebaseFirestore.instance');
+    return FirebaseFirestore.instance;
+  }
+
+  FirebaseAuth get _auth {
+    print('DEBUG: Accessing FirebaseAuth.instance');
+    return FirebaseAuth.instance;
+  }
 
   CollectionReference get _todosCollection => _firestore.collection('todos');
   CollectionReference get _peopleCollection => _firestore.collection('people');

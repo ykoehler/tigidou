@@ -14,7 +14,14 @@ class PeopleScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return GradientScaffold(
-      appBar: AppBar(title: Text(l10n.people)),
+      appBar: AppBar(
+        title: Image.asset(
+          'assets/images/logo_banner.png',
+          height: 32,
+          fit: BoxFit.contain,
+        ),
+        centerTitle: false,
+      ),
       body: Consumer<PersonProvider>(
         builder: (context, personProvider, child) {
           return StreamBuilder<List<Person>>(

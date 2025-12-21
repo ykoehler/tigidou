@@ -37,5 +37,10 @@
   "emptyEmail": "Veuillez entrer votre email",
   "emptyPassword": "Veuillez entrer votre mot de passe",
   "passwordTooShort": "Le mot de passe doit comporter au moins 6 caractères",
-  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas"
+  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+  "forgotPassword": "Mot de passe oublié ?",
+  "resetPassword": "Réinitialiser le mot de passe",
+  "sendResetEmail": "Envoyer l'email de réinitialisation",
+  "passwordResetSent": "Email de réinitialisation envoyé !",
+  "backToLogin": "Retour à la connexion"
 }
