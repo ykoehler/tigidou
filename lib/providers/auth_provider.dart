@@ -122,6 +122,19 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<void> signInAnonymously() async {
+    _setLoading(true);
+    _clearError();
+    try {
+      await _authService.signInAnonymously();
+    } catch (e) {
+      _setError(e.toString());
+      rethrow;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();

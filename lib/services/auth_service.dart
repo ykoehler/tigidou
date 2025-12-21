@@ -43,4 +43,13 @@ class AuthService {
   Future<void> sendPasswordResetEmail(String email) async {
     return await _auth.sendPasswordResetEmail(email: email);
   }
+
+  // Sign in anonymously
+  Future<UserCredential> signInAnonymously() async {
+    try {
+      return await _auth.signInAnonymously();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

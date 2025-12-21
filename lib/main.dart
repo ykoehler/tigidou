@@ -19,5 +19,10 @@ void main() async {
     FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
   }
 
+  // Sign in anonymously if no user is authenticated
+  if (FirebaseAuth.instance.currentUser == null) {
+    await FirebaseAuth.instance.signInAnonymously();
+  }
+
   runApp(const MyApp());
 }
