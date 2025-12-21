@@ -85,14 +85,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 final todos = snapshot.data ?? [];
 
-                // Filter todos
+                // Filter todos based on search query
                 final filteredTodos = todos.where((todo) {
                   return todo.title.toLowerCase().contains(
                     _searchQuery.toLowerCase(),
                   );
                 }).toList();
 
+                // If list is empty, decide what to show
                 if (filteredTodos.isEmpty) {
+                  // Case 1: Search query is active - show live preview
                   if (_searchQuery.isNotEmpty) {
                     // Parse the query to get a derived date
                     final parsedResult = ToolParser.parse(_searchQuery);
@@ -116,16 +118,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ?.copyWith(color: Colors.grey),
                             ),
                           ),
-                          // Show the draft item
-                          // We force it expanded so user sees details immediately
-                          // TodoListItem manages its own expansion state, but we can't easily force it open from here
-                          // without a key or changing its API.
-                          // However, since it's a new widget every time query changes (key changes or rebuilt),
-                          // we can default it to expanded if we want?
-                          // For now, let's just show it. User can expand it.
-                          // Actually user said "display todo expanded view".
-                          // Let's modify TodoListItem to accept `initiallyExpanded`?
-                          // Or just rely on the fact that it's a preview.
                           Card(
                             margin: const EdgeInsets.symmetric(
                               horizontal: 16.0,
@@ -152,7 +144,50 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   }
-                  return Center(child: Text(l10n.noTodos));
+
+                  // Case 2: Search query is empty, and list is empty
+                  // This happens when there are no todos OR all todos are completed
+                  // (Note: Currently the 'todos' stream from provider seems to return all todos,
+                  // but the user's request implies we should show this when active todos are gone)
+                  // Let's refine the logic: if there are ANY uncompleted todos, we show the list.
+                  // If there are NO uncompleted todos (or no todos at all), show the image.
+
+                  final activeTodos = todos
+                      .where((t) => !t.isCompleted)
+                      .toList();
+                  if (activeTodos.isEmpty) {
+                    return Align(
+                      alignment: const Alignment(
+                        0,
+                        -0.2,
+                      ), // Visually center it higher
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              l10n.itsBrand,
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(
+                                    color: Colors.white70,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                            ),
+                            Image.asset(
+                              'assets/images/logo_banner.png',
+                              height: 48,
+                              fit: BoxFit.contain,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  // Fallback for when there are only completed todos (if we wanted to show them)
+                  // But based on the request, if "they are all marked done somehow", we show the image.
+                  // So the activeTodos.isEmpty check above covers both "none" and "all marked done".
                 }
 
                 return ListView.builder(

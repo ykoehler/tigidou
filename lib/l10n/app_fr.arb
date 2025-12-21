@@ -6,6 +6,7 @@
   "searchHint": "Rechercher ou ajouter...",
   "newTodoPreview": "Aperçu de la nouvelle tâche",
   "createTodo": "Créer la tâche",
+  "itsBrand": "C'est ",
   "noTodos": "Aucune tâche. Ajoutez-en une !",
   "addTodoDialogTitle": "Ajouter une tâche",
   "addTodoHint": "Entrez la tâche (ex: \"Appeler papa @demain @14h\")",
@@ -42,5 +43,11 @@
   "resetPassword": "Réinitialiser le mot de passe",
   "sendResetEmail": "Envoyer l'email de réinitialisation",
   "passwordResetSent": "Email de réinitialisation envoyé !",
-  "backToLogin": "Retour à la connexion"
+  "backToLogin": "Retour à la connexion",
+  "profile": "Profil",
+  "enableBiometrics": "Activer la connexion biométrique",
+  "loginWithBiometrics": "Connexion avec la biométrie",
+  "biometricReason": "Veuillez vous authentifier pour vous connecter en toute sécurité",
+  "biometricsNotAvailable": "Biométrie non disponible sur cet appareil",
+  "storedCredentialsNotFound": "Identifiants enregistrés introuvables. Veuillez vous connecter d'abord avec votre email et votre mot de passe."
 }
