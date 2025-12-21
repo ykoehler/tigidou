@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
-import 'package:tigidou/main.dart';
+import 'package:tigidou/app.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 

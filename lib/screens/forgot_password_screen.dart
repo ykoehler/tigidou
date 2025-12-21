@@ -1,38 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import 'register_screen.dart';
-import 'forgot_password_screen.dart';
-import '../widgets/gradient_scaffold.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
+import '../widgets/gradient_scaffold.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
-  void _handleLogin() async {
+  void _handleResetPassword() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       try {
-        await authProvider.signIn(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
-        );
+        await authProvider.sendPasswordResetEmail(_emailController.text.trim());
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.passwordResetSent),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(
@@ -49,6 +51,14 @@ class _LoginScreenState extends State<LoginScreen> {
     final isLoading = context.watch<AuthProvider>().isLoading;
 
     return GradientScaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white70),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -65,15 +75,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Hero(
-                      tag: 'app_logo',
-                      child: Image.asset(
-                        'assets/images/logo_banner.png',
-                        height: 60,
-                        fit: BoxFit.contain,
+                    const Icon(
+                      Icons.lock_reset,
+                      size: 64,
+                      color: Colors.white70,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.resetPassword,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 32),
                     TextFormField(
                       controller: _emailController,
                       style: const TextStyle(color: Colors.white),
@@ -105,45 +121,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: true,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        labelText: l10n.password,
-                        labelStyle: const TextStyle(color: Colors.white70),
-                        prefixIcon: const Icon(
-                          Icons.lock,
-                          color: Colors.white70,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: Colors.white30),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Colors.blueAccent,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return l10n.emptyPassword;
-                        }
-                        if (value.length < 6) {
-                          return l10n.passwordTooShort;
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: isLoading ? null : _handleLogin,
+                        onPressed: isLoading ? null : _handleResetPassword,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
                           shape: RoundedRectangleBorder(
@@ -155,42 +138,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: Colors.white,
                               )
                             : Text(
-                                l10n.login,
+                                l10n.sendResetEmail,
                                 style: const TextStyle(
                                   fontSize: 18,
                                   color: Colors.white,
                                 ),
                               ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ForgotPasswordScreen(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        l10n.forgotPassword,
-                        style: const TextStyle(color: Colors.white70),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const RegisterScreen(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        l10n.noAccount,
-                        style: const TextStyle(color: Colors.white70),
                       ),
                     ),
                   ],

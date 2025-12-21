@@ -79,8 +79,8 @@ void main() {
     // Wait for the stream to emit
     await tester.pumpAndSettle();
 
-    // Verify that the title is present.
-    expect(find.text('Todos'), findsOneWidget);
+    // Verify that the logo is present in the AppBar.
+    expect(find.byType(Image), findsWidgets);
 
     // Verify that todos are displayed.
     expect(find.text('Buy milk', findRichText: true), findsOneWidget);

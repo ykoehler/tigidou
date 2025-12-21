@@ -38,7 +38,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return GradientScaffold(
-      appBar: AppBar(title: Text(l10n.todos)),
+      appBar: AppBar(
+        title: Image.asset(
+          'assets/images/logo_banner.png',
+          height: 32,
+          fit: BoxFit.contain,
+        ),
+        centerTitle: false,
+      ),
       body: Column(
         children: [
           Padding(

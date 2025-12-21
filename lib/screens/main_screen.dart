@@ -34,7 +34,10 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Image.asset('assets/icon/app_icon.png', height: 32),
+            Hero(
+              tag: 'app_logo',
+              child: Image.asset('assets/icon/app_icon.png', height: 32),
+            ),
             const SizedBox(width: 12),
             Text(l10n.appTitle),
           ],
