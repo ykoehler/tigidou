@@ -5,12 +5,10 @@ import '../models/person_model.dart';
 
 class DatabaseService {
   FirebaseFirestore get _firestore {
-    print('DEBUG: Accessing FirebaseFirestore.instance');
     return FirebaseFirestore.instance;
   }
 
   FirebaseAuth get _auth {
-    print('DEBUG: Accessing FirebaseAuth.instance');
     return FirebaseAuth.instance;
   }
 
