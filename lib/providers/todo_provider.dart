@@ -15,20 +15,27 @@ class TodoProvider with ChangeNotifier {
   Stream<List<Todo>> get todos => _databaseService.todos;
 
   Future<void> addTodo(String title, DateTime? dueDate) async {
-    // Parse the title for natural language dates using ToolParser
-    final parsedResult = ToolParser.parse(title);
-    final finalDueDate = parsedResult.derivedDate ?? dueDate;
+    try {
+      // Parse the title for natural language dates using ToolParser
+      final parsedResult = ToolParser.parse(title);
+      final finalDueDate = parsedResult.derivedDate ?? dueDate;
 
-    // We keep the title as is, as requested by the user ("preserve the format")
-    // But we use the parsed date for scheduling.
+      // We keep the title as is, as requested by the user ("preserve the format")
+      // But we use the parsed date for scheduling.
 
-    final id = await _databaseService.addTodo(title, finalDueDate);
-    if (finalDueDate != null) {
-      await _notificationService.scheduleNotification(
-        id.hashCode,
-        title,
-        finalDueDate,
-      );
+      final id = await _databaseService.addTodo(title, finalDueDate);
+      if (finalDueDate != null) {
+        await _notificationService.scheduleNotification(
+          id.hashCode,
+          title,
+          finalDueDate,
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('TodoProvider: Error adding todo: $e');
+      }
+      rethrow;
     }
   }
 

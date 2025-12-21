@@ -8,10 +8,24 @@ class PersonProvider with ChangeNotifier {
   Stream<List<Person>> get people => _databaseService.people;
 
   Future<void> addPerson(String username, String displayName) async {
-    await _databaseService.addPerson(username, displayName);
+    try {
+      await _databaseService.addPerson(username, displayName);
+    } catch (e) {
+      if (kDebugMode) {
+        print('PersonProvider: Error adding person: $e');
+      }
+      rethrow;
+    }
   }
 
   Future<void> deletePerson(String id) async {
-    await _databaseService.deletePerson(id);
+    try {
+      await _databaseService.deletePerson(id);
+    } catch (e) {
+      if (kDebugMode) {
+        print('PersonProvider: Error deleting person: $e');
+      }
+      rethrow;
+    }
   }
 }

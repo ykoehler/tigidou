@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../models/todo_model.dart';
 import '../models/person_model.dart';
 
@@ -16,6 +17,13 @@ class DatabaseService {
   CollectionReference get _peopleCollection => _firestore.collection('people');
 
   String? get _currentUserId => _auth.currentUser?.uid;
+
+  void _logError(String operation, Object error, StackTrace stackTrace) {
+    if (kDebugMode) {
+      print('DatabaseService Error [$operation]: $error');
+      print('Stack trace: $stackTrace');
+    }
+  }
 
   Stream<List<Todo>> get todos {
     final uid = _currentUserId;
@@ -51,40 +59,107 @@ class DatabaseService {
   }
 
   Future<String> addTodo(String title, DateTime? dueDate) async {
-    final uid = _currentUserId;
-    if (uid == null) throw Exception('User not authenticated');
+    try {
+      final uid = _currentUserId;
+      if (uid == null) throw Exception('User not authenticated');
 
-    final docRef = await _todosCollection.add({
-      'title': title,
-      'isCompleted': false,
-      'dueDate': dueDate?.millisecondsSinceEpoch,
-      'userId': uid,
-      'sharedWith': [],
-    });
-    return docRef.id;
+      if (kDebugMode) {
+        print('DatabaseService: Adding todo - title: $title, userId: $uid');
+      }
+
+      final docRef = await _todosCollection.add({
+        'title': title,
+        'isCompleted': false,
+        'dueDate': dueDate?.millisecondsSinceEpoch,
+        'userId': uid,
+        'sharedWith': [],
+      });
+
+      if (kDebugMode) {
+        print('DatabaseService: Todo added successfully with ID: ${docRef.id}');
+      }
+
+      return docRef.id;
+    } catch (e, stackTrace) {
+      _logError('addTodo', e, stackTrace);
+      rethrow;
+    }
   }
 
   Future<void> updateTodo(Todo todo) async {
-    await _todosCollection.doc(todo.id).update(todo.toMap());
+    try {
+      if (kDebugMode) {
+        print('DatabaseService: Updating todo - id: ${todo.id}');
+      }
+
+      await _todosCollection.doc(todo.id).update(todo.toMap());
+
+      if (kDebugMode) {
+        print('DatabaseService: Todo updated successfully');
+      }
+    } catch (e, stackTrace) {
+      _logError('updateTodo', e, stackTrace);
+      rethrow;
+    }
   }
 
   Future<void> deleteTodo(String id) async {
-    await _todosCollection.doc(id).delete();
+    try {
+      if (kDebugMode) {
+        print('DatabaseService: Deleting todo - id: $id');
+      }
+
+      await _todosCollection.doc(id).delete();
+
+      if (kDebugMode) {
+        print('DatabaseService: Todo deleted successfully');
+      }
+    } catch (e, stackTrace) {
+      _logError('deleteTodo', e, stackTrace);
+      rethrow;
+    }
   }
 
   Future<String> addPerson(String username, String displayName) async {
-    final uid = _currentUserId;
-    if (uid == null) throw Exception('User not authenticated');
+    try {
+      final uid = _currentUserId;
+      if (uid == null) throw Exception('User not authenticated');
 
-    final docRef = await _peopleCollection.add({
-      'username': username,
-      'displayName': displayName,
-      'userId': uid,
-    });
-    return docRef.id;
+      if (kDebugMode) {
+        print('DatabaseService: Adding person - username: $username, displayName: $displayName, userId: $uid');
+      }
+
+      final docRef = await _peopleCollection.add({
+        'username': username,
+        'displayName': displayName,
+        'userId': uid,
+      });
+
+      if (kDebugMode) {
+        print('DatabaseService: Person added successfully with ID: ${docRef.id}');
+      }
+
+      return docRef.id;
+    } catch (e, stackTrace) {
+      _logError('addPerson', e, stackTrace);
+      rethrow;
+    }
   }
 
   Future<void> deletePerson(String id) async {
-    await _peopleCollection.doc(id).delete();
+    try {
+      if (kDebugMode) {
+        print('DatabaseService: Deleting person - id: $id');
+      }
+
+      await _peopleCollection.doc(id).delete();
+
+      if (kDebugMode) {
+        print('DatabaseService: Person deleted successfully');
+      }
+    } catch (e, stackTrace) {
+      _logError('deletePerson', e, stackTrace);
+      rethrow;
+    }
   }
 }
