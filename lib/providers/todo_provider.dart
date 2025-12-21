@@ -40,35 +40,56 @@ class TodoProvider with ChangeNotifier {
   }
 
   Future<void> updateTodo(Todo todo) async {
-    await _databaseService.updateTodo(todo);
+    try {
+      await _databaseService.updateTodo(todo);
 
-    // Cancel existing notification
-    await _notificationService.cancelNotification(todo.id.hashCode);
+      // Cancel existing notification
+      await _notificationService.cancelNotification(todo.id.hashCode);
 
-    // Schedule new notification if needed
-    if (!todo.isCompleted && todo.dueDate != null) {
-      await _notificationService.scheduleNotification(
-        todo.id.hashCode,
-        todo.title,
-        todo.dueDate!,
-      );
+      // Schedule new notification if needed
+      if (!todo.isCompleted && todo.dueDate != null) {
+        await _notificationService.scheduleNotification(
+          todo.id.hashCode,
+          todo.title,
+          todo.dueDate!,
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('TodoProvider: Error updating todo: $e');
+      }
+      rethrow;
     }
   }
 
   Future<void> toggleTodoStatus(Todo todo) async {
-    final updatedTodo = Todo(
-      id: todo.id,
-      title: todo.title,
-      isCompleted: !todo.isCompleted,
-      dueDate: todo.dueDate,
-      userId: todo.userId,
-      sharedWith: todo.sharedWith,
-    );
-    await updateTodo(updatedTodo);
+    try {
+      final updatedTodo = Todo(
+        id: todo.id,
+        title: todo.title,
+        isCompleted: !todo.isCompleted,
+        dueDate: todo.dueDate,
+        userId: todo.userId,
+        sharedWith: todo.sharedWith,
+      );
+      await updateTodo(updatedTodo);
+    } catch (e) {
+      if (kDebugMode) {
+        print('TodoProvider: Error toggling todo status: $e');
+      }
+      rethrow;
+    }
   }
 
   Future<void> deleteTodo(String id) async {
-    await _databaseService.deleteTodo(id);
-    await _notificationService.cancelNotification(id.hashCode);
+    try {
+      await _databaseService.deleteTodo(id);
+      await _notificationService.cancelNotification(id.hashCode);
+    } catch (e) {
+      if (kDebugMode) {
+        print('TodoProvider: Error deleting todo: $e');
+      }
+      rethrow;
+    }
   }
 }
