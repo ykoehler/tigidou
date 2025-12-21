@@ -25,9 +25,10 @@ jobs:
           APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+          CERTIFICATE_PRIVATE_KEY: ${{ secrets.CERTIFICATE_PRIVATE_KEY }}
         run: |
           keychain initialize
-          app-store-connect fetch-signing-files "com.yannickkoehler.tigidou" --type IOS_APP_STORE --create
+          app-store-connect fetch-signing-files "com.yannickkoehler.tigidou" --type IOS_APP_STORE --create --certificate-key "$CERTIFICATE_PRIVATE_KEY"
           keychain add-certificates
           xcode-project use-profiles
 
