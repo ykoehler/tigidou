@@ -3,6 +3,9 @@ pre-commit:
     tests:
       run: flutter test
       all_files: true
+    analyzer:
+      run: flutter analyze
+      all_files: true
 
 test:all:
   commands:

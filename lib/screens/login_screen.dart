@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
+import '../widgets/app_logo.dart';
 import '../widgets/gradient_scaffold.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
 
@@ -65,14 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Hero(
-                      tag: 'app_logo',
-                      child: Image.asset(
-                        'assets/images/logo_banner.png',
-                        height: 60,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                    const Hero(tag: 'app_logo', child: AppLogo(height: 60)),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _emailController,

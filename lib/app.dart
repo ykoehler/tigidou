@@ -35,6 +35,10 @@ class MyApp extends StatelessWidget {
                 backgroundColor: Colors.transparent,
                 elevation: 0,
               ),
+              bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+              ),
               inputDecorationTheme: InputDecorationTheme(
                 filled: true,
                 fillColor: Colors.white.withValues(alpha: 0.1),
