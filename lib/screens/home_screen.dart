@@ -102,6 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: _searchQuery,
                       isCompleted: false,
                       dueDate: parsedResult.derivedDate,
+                      userId: '', // Draft not saved yet
                     );
 
                     return SingleChildScrollView(
