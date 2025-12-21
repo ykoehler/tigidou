@@ -4,6 +4,8 @@ class Todo {
   final bool isCompleted;
   final DateTime? dueDate;
   final String? group;
+  final String userId;
+  final List<String> sharedWith;
 
   Todo({
     required this.id,
@@ -11,6 +13,8 @@ class Todo {
     required this.isCompleted,
     this.dueDate,
     this.group,
+    required this.userId,
+    this.sharedWith = const [],
   });
 
   factory Todo.fromMap(Map<String, dynamic> map, String id) {
@@ -22,6 +26,8 @@ class Todo {
           ? DateTime.fromMillisecondsSinceEpoch(map['dueDate'])
           : null,
       group: map['group'],
+      userId: map['userId'] ?? '',
+      sharedWith: List<String>.from(map['sharedWith'] ?? []),
     );
   }
 
@@ -31,6 +37,8 @@ class Todo {
       'isCompleted': isCompleted,
       'dueDate': dueDate?.millisecondsSinceEpoch,
       'group': group,
+      'userId': userId,
+      'sharedWith': sharedWith,
     };
   }
 }

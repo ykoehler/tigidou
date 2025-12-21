@@ -54,6 +54,8 @@ class TodoProvider with ChangeNotifier {
       title: todo.title,
       isCompleted: !todo.isCompleted,
       dueDate: todo.dueDate,
+      userId: todo.userId,
+      sharedWith: todo.sharedWith,
     );
     await updateTodo(updatedTodo);
   }

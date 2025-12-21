@@ -55,8 +55,8 @@ void main() {
     final mockPersonProvider = MockPersonProvider();
 
     mockTodoProvider.setTodos([
-      Todo(id: '1', title: 'Buy milk', isCompleted: false),
-      Todo(id: '2', title: 'Walk dog', isCompleted: false),
+      Todo(id: '1', title: 'Buy milk', isCompleted: false, userId: 'user1'),
+      Todo(id: '2', title: 'Walk dog', isCompleted: false, userId: 'user1'),
     ]);
 
     // Build our app and trigger a frame.
@@ -95,8 +95,8 @@ void main() {
 
     // Mock initial data
     mockTodoProvider.setTodos([
-      Todo(id: '1', title: 'Buy milk', isCompleted: false),
-      Todo(id: '2', title: 'Walk dog', isCompleted: false),
+      Todo(id: '1', title: 'Buy milk', isCompleted: false, userId: 'user1'),
+      Todo(id: '2', title: 'Walk dog', isCompleted: false, userId: 'user1'),
     ]);
 
     await tester.pumpWidget(

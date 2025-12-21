@@ -171,6 +171,8 @@ class _TodoListItemState extends State<TodoListItem> {
                                             isCompleted:
                                                 widget.todo.isCompleted,
                                             dueDate: newDueDate,
+                                            userId: widget.todo.userId,
+                                            sharedWith: widget.todo.sharedWith,
                                           );
                                           Provider.of<TodoProvider>(
                                             context,
@@ -394,6 +396,8 @@ class _TodoListItemState extends State<TodoListItem> {
           title: widget.todo.title,
           isCompleted: widget.todo.isCompleted,
           dueDate: newDueDate,
+          userId: widget.todo.userId,
+          sharedWith: widget.todo.sharedWith,
         );
         Provider.of<TodoProvider>(
           context,
