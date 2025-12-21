@@ -32,16 +32,12 @@ class _MainScreenState extends State<MainScreen> {
     final l10n = AppLocalizations.of(context)!;
     return GradientScaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Hero(
-              tag: 'app_logo',
-              child: Image.asset('assets/icon/app_icon.png', height: 32),
-            ),
-            const SizedBox(width: 12),
-            Text(l10n.appTitle),
-          ],
+        title: Image.asset(
+          'assets/images/logo_banner.png',
+          height: 32,
+          fit: BoxFit.contain,
         ),
+        centerTitle: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -53,24 +49,35 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.transparent,
-        type: BottomNavigationBarType.fixed,
-        elevation: 0,
-        unselectedItemColor: Colors.white60,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.list),
-            label: AppLocalizations.of(context)!.todos,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          border: Border(
+            top: BorderSide(
+              color: Colors.white.withValues(alpha: 0.1),
+              width: 0.5,
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.people),
-            label: AppLocalizations.of(context)!.people,
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blueAccent,
-        onTap: _onItemTapped,
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.transparent,
+          type: BottomNavigationBarType.fixed,
+          elevation: 0,
+          unselectedItemColor: Colors.white54,
+          selectedItemColor: Colors.blueAccent,
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.list),
+              label: AppLocalizations.of(context)!.todos,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.people),
+              label: AppLocalizations.of(context)!.people,
+            ),
+          ],
+        ),
       ),
     );
   }

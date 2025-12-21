@@ -35,7 +35,7 @@ jobs:
           keychain initialize
           app-store-connect fetch-signing-files "com.yannickkoehler.tigidou" --type IOS_APP_STORE --create --certificate-key "$CERTIFICATE_PRIVATE_KEY"
           keychain add-certificates
-          xcode-project use-profiles
+          xcode-project use-profiles --export-options-plist=ios/ExportOptions.plist
 
       - uses: subosito/flutter-action@v2
         with:

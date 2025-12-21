@@ -55,6 +55,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return GradientScaffold(
       appBar: AppBar(
+        title: Image.asset(
+          'assets/images/logo_banner.png',
+          height: 32,
+          fit: BoxFit.contain,
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(

@@ -18,6 +18,7 @@ class GradientScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
+      extendBody: true,
       appBar: appBar,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
@@ -31,6 +32,7 @@ class GradientScaffold extends StatelessWidget {
         ),
         child: SafeArea(
           top: false,
+          bottom: false,
           child: Padding(
             padding: EdgeInsets.only(
               top: appBar != null

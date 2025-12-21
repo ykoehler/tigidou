@@ -71,7 +71,17 @@ void main() {
               value: mockPersonProvider,
             ),
           ],
-          child: const HomeScreen(),
+          child: Scaffold(
+            appBar: AppBar(
+              title: Image.asset(
+                'assets/images/logo_banner.png',
+                height: 32,
+                fit: BoxFit.contain,
+              ),
+              centerTitle: false,
+            ),
+            body: const HomeScreen(),
+          ),
         ),
       ),
     );
@@ -110,7 +120,17 @@ void main() {
               value: mockPersonProvider,
             ),
           ],
-          child: const HomeScreen(),
+          child: Scaffold(
+            appBar: AppBar(
+              title: Image.asset(
+                'assets/images/logo_banner.png',
+                height: 32,
+                fit: BoxFit.contain,
+              ),
+              centerTitle: false,
+            ),
+            body: const HomeScreen(),
+          ),
         ),
       ),
     );
@@ -146,7 +166,17 @@ void main() {
               value: mockPersonProvider,
             ),
           ],
-          child: const HomeScreen(),
+          child: Scaffold(
+            appBar: AppBar(
+              title: Image.asset(
+                'assets/images/logo_banner.png',
+                height: 32,
+                fit: BoxFit.contain,
+              ),
+              centerTitle: false,
+            ),
+            body: const HomeScreen(),
+          ),
         ),
       ),
     );
@@ -181,7 +211,17 @@ void main() {
               value: mockPersonProvider,
             ),
           ],
-          child: const HomeScreen(),
+          child: Scaffold(
+            appBar: AppBar(
+              title: Image.asset(
+                'assets/images/logo_banner.png',
+                height: 32,
+                fit: BoxFit.contain,
+              ),
+              centerTitle: false,
+            ),
+            body: const HomeScreen(),
+          ),
         ),
       ),
     );

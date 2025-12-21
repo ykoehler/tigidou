@@ -5,7 +5,6 @@ import '../providers/todo_provider.dart';
 import '../models/person_model.dart';
 import '../models/todo_model.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
-import '../widgets/gradient_scaffold.dart';
 
 class PeopleScreen extends StatelessWidget {
   const PeopleScreen({super.key});
@@ -13,15 +12,8 @@ class PeopleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return GradientScaffold(
-      appBar: AppBar(
-        title: Image.asset(
-          'assets/images/logo_banner.png',
-          height: 32,
-          fit: BoxFit.contain,
-        ),
-        centerTitle: false,
-      ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Consumer<PersonProvider>(
         builder: (context, personProvider, child) {
           return StreamBuilder<List<Person>>(
