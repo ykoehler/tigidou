@@ -36,6 +36,15 @@ void main() {
       expect(result.derivedDate, isNotNull);
     });
 
+    test('parses explicit @date:2023-12-31', () {
+      final result = ToolParser.parse('Call @date:2023-12-31');
+      expect(result.tags.first.type, ToolType.date);
+      expect(result.tags.first.data, '2023-12-31');
+      expect(result.derivedDate?.year, 2023);
+      expect(result.derivedDate?.month, 12);
+      expect(result.derivedDate?.day, 31);
+    });
+
     test('parses explicit @time:14:30', () {
       final result = ToolParser.parse('Call @time:14:30');
       expect(result.tags.first.type, ToolType.time);
