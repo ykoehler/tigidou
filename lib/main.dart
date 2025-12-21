@@ -20,8 +20,14 @@ void main() async {
   }
 
   // Sign in anonymously if no user is authenticated
+  // This ensures data persistence even for users without accounts
   if (FirebaseAuth.instance.currentUser == null) {
-    await FirebaseAuth.instance.signInAnonymously();
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+    } catch (e) {
+      // Log error but continue - app can still function without persistence
+      debugPrint('Failed to sign in anonymously: $e');
+    }
   }
 
   runApp(const MyApp());
