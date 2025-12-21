@@ -39,12 +39,55 @@ class _MainScreenState extends State<MainScreen> {
         ),
         centerTitle: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              Provider.of<AuthProvider>(context, listen: false).signOut();
+          Consumer<AuthProvider>(
+            builder: (context, auth, _) {
+              return PopupMenuButton<String>(
+                icon: const Icon(Icons.account_circle),
+                tooltip: l10n.profile,
+                onSelected: (value) {
+                  if (value == 'logout') {
+                    auth.signOut();
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    enabled: false,
+                    child: Text(
+                      auth.user?.email ?? '',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  if (auth.isBiometricAvailable)
+                    PopupMenuItem<String>(
+                      child: StatefulBuilder(
+                        builder: (context, setState) {
+                          return SwitchListTile(
+                            title: Text(l10n.enableBiometrics),
+                            value: auth.isBiometricEnabled,
+                            onChanged: (bool value) {
+                              auth.setBiometricEnabled(value);
+                              setState(() {});
+                            },
+                            contentPadding: EdgeInsets.zero,
+                          );
+                        },
+                      ),
+                    ),
+                  PopupMenuItem<String>(
+                    value: 'logout',
+                    child: ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: Text(l10n.logout),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
+              );
             },
-            tooltip: l10n.logout,
           ),
         ],
       ),

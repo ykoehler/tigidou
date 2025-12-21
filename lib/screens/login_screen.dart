@@ -157,6 +157,47 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                       ),
                     ),
+                    if (context.watch<AuthProvider>().isBiometricEnabled) ...[
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: OutlinedButton.icon(
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  final navigator = ScaffoldMessenger.of(
+                                    context,
+                                  );
+                                  try {
+                                    await context
+                                        .read<AuthProvider>()
+                                        .signInWithBiometrics(
+                                          l10n.biometricReason,
+                                        );
+                                  } catch (e) {
+                                    navigator.showSnackBar(
+                                      SnackBar(content: Text(e.toString())),
+                                    );
+                                  }
+                                },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.blueAccent),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: const Icon(
+                            Icons.fingerprint,
+                            color: Colors.white,
+                          ),
+                          label: Text(
+                            l10n.loginWithBiometrics,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     TextButton(
                       onPressed: () {
