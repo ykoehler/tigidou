@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'people_screen.dart';
+import 'dashboard_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
@@ -16,20 +17,23 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomeScreen(),
-    PeopleScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final auth = context.watch<AuthProvider>();
+
+    final List<Widget> widgetOptions = <Widget>[
+      DashboardScreen(
+        onNavigate: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      ),
+      const HomeScreen(),
+      const PeopleScreen(),
+    ];
+
     return GradientScaffold(
       appBar: AppBar(
         title: Image.asset(
@@ -38,91 +42,81 @@ class _MainScreenState extends State<MainScreen> {
           fit: BoxFit.contain,
         ),
         centerTitle: false,
-        actions: [
-          Consumer<AuthProvider>(
-            builder: (context, auth, _) {
-              return PopupMenuButton<String>(
-                icon: const Icon(Icons.account_circle),
-                tooltip: l10n.profile,
-                onSelected: (value) {
-                  if (value == 'logout') {
-                    auth.signOut();
-                  }
-                },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  PopupMenuItem<String>(
-                    enabled: false,
-                    child: Text(
-                      auth.user?.email ?? '',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  if (auth.isBiometricAvailable)
-                    PopupMenuItem<String>(
-                      child: StatefulBuilder(
-                        builder: (context, setState) {
-                          return SwitchListTile(
-                            title: Text(l10n.enableBiometrics),
-                            value: auth.isBiometricEnabled,
-                            onChanged: (bool value) async {
-                              final success = await auth.setBiometricEnabled(
-                                value,
-                                l10n.biometricEnrollmentReason,
-                              );
-
-                              if (context.mounted) {
-                                if (value && success) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        l10n.biometricEnrollmentSuccess,
-                                      ),
-                                    ),
-                                  );
-                                } else if (value && !success) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        l10n.biometricEnrollmentFailed,
-                                      ),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                } else if (!value) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(l10n.biometricDisabled),
-                                    ),
-                                  );
-                                }
-                                setState(() {});
-                              }
-                            },
-                            contentPadding: EdgeInsets.zero,
-                          );
-                        },
-                      ),
-                    ),
-
-                  PopupMenuItem<String>(
-                    value: 'logout',
-                    child: ListTile(
-                      leading: const Icon(Icons.logout),
-                      title: Text(l10n.logout),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
       ),
-      body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
+      drawer: Drawer(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0D47A1), Color(0xFF1976D2)],
+            ),
+          ),
+          child: Column(
+            children: [
+              UserAccountsDrawerHeader(
+                decoration: const BoxDecoration(color: Colors.transparent),
+                currentAccountPicture: const CircleAvatar(
+                  backgroundColor: Colors.white24,
+                  child: Icon(Icons.person, color: Colors.white, size: 40),
+                ),
+                accountName: const Text('User'),
+                accountEmail: Text(auth.user?.email ?? ''),
+              ),
+              if (auth.isBiometricAvailable)
+                SwitchListTile(
+                  title: Text(l10n.enableBiometrics),
+                  secondary: const Icon(Icons.fingerprint, color: Colors.white),
+                  value: auth.isBiometricEnabled,
+                  onChanged: (bool value) async {
+                    final success = await auth.setBiometricEnabled(
+                      value,
+                      l10n.biometricEnrollmentReason,
+                    );
+
+                    if (context.mounted) {
+                      if (value && success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.biometricEnrollmentSuccess),
+                          ),
+                        );
+                      } else if (value && !success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.biometricEnrollmentFailed),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      } else if (!value) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.biometricDisabled)),
+                        );
+                      }
+                    }
+                  },
+                ),
+              const Divider(color: Colors.white24),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.white),
+                title: Text(l10n.logout),
+                onTap: () {
+                  auth.signOut();
+                },
+              ),
+              const Spacer(),
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'v0.1.0',
+                  style: TextStyle(color: Colors.white24, fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      body: Center(child: widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.transparent,
@@ -140,15 +134,23 @@ class _MainScreenState extends State<MainScreen> {
           unselectedItemColor: Colors.white54,
           selectedItemColor: Colors.blueAccent,
           currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
           items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.list),
-              label: AppLocalizations.of(context)!.todos,
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard_rounded),
+              label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.people),
-              label: AppLocalizations.of(context)!.people,
+              icon: const Icon(Icons.list_alt_rounded),
+              label: l10n.todos,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.people_alt_rounded),
+              label: l10n.people,
             ),
           ],
         ),
