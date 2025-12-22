@@ -49,5 +49,11 @@
   "loginWithBiometrics": "Connexion avec la biométrie",
   "biometricReason": "Veuillez vous authentifier pour vous connecter en toute sécurité",
   "biometricsNotAvailable": "Biométrie non disponible sur cet appareil",
-  "storedCredentialsNotFound": "Identifiants enregistrés introuvables. Veuillez vous connecter d'abord avec votre email et votre mot de passe."
+  "storedCredentialsNotFound": "Identifiants enregistrés introuvables. Veuillez vous connecter d'abord avec votre email et votre mot de passe.",
+  "biometricEnrollmentReason": "Authentifiez-vous pour activer la connexion biométrique",
+  "biometricEnrollmentSuccess": "Connexion biométrique activée avec succès !",
+  "biometricEnrollmentFailed": "Échec de l'activation de la connexion biométrique. Veuillez réessayer.",
+  "biometricDisabled": "Connexion biométrique désactivée",
+  "authenticating": "Authentification en cours..."
+
 }

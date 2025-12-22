@@ -38,15 +38,99 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setBiometricEnabled(bool enabled) async {
-    _isBiometricEnabled = enabled;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('biometric_enabled', enabled);
-    if (!enabled) {
-      await _secureStorage.delete(key: 'email');
-      await _secureStorage.delete(key: 'password');
+  /// Enable or disable biometric authentication
+  /// When enabling, prompts for biometric authentication immediately
+  Future<bool> setBiometricEnabled(
+    bool enabled,
+    String enrollmentReason,
+  ) async {
+    if (enabled) {
+      // Prompt for biometric authentication to enroll
+      final authenticated = await _biometricService.authenticate(
+        localizedReason: enrollmentReason,
+      );
+
+      if (!authenticated) {
+        return false; // Failed to authenticate, don't enable
+      }
+
+      // Store current user's email for future auto-login
+      final currentUser = _authService.currentUser;
+      if (currentUser != null && currentUser.email != null) {
+        await _secureStorage.write(
+          key: 'biometric_email',
+          value: currentUser.email,
+        );
+        await _secureStorage.write(
+          key: 'biometric_user_id',
+          value: currentUser.uid,
+        );
+      }
+
+      _isBiometricEnabled = true;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('biometric_enabled', true);
+    } else {
+      // Disable biometric
+      await _clearBiometricCredentials();
+      _isBiometricEnabled = false;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('biometric_enabled', false);
     }
+
     notifyListeners();
+    return true;
+  }
+
+  /// Clear all stored biometric credentials
+  Future<void> _clearBiometricCredentials() async {
+    await _secureStorage.delete(key: 'biometric_email');
+    await _secureStorage.delete(key: 'biometric_user_id');
+    await _secureStorage.delete(key: 'biometric_password');
+  }
+
+  /// Attempt auto-login with biometrics on app start
+  /// Returns true if auto-login succeeded, false otherwise
+  Future<bool> attemptBiometricAutoLogin(String biometricReason) async {
+    if (!_isBiometricEnabled) {
+      return false;
+    }
+
+    try {
+      // Check if we have stored credentials
+      final email = await _secureStorage.read(key: 'biometric_email');
+      final password = await _secureStorage.read(key: 'biometric_password');
+
+      if (email == null) {
+        // No stored email, can't auto-login
+        return false;
+      }
+
+      // Prompt for biometric authentication
+      final authenticated = await _biometricService.authenticate(
+        localizedReason: biometricReason,
+      );
+
+      if (!authenticated) {
+        return false; // User cancelled or failed authentication
+      }
+
+      // Check if we have a stored password (from previous login)
+      if (password != null) {
+        // Attempt sign in with stored credentials
+        _setLoading(true);
+        await _authService.signIn(email, password);
+        _setLoading(false);
+        return true;
+      } else {
+        // No password stored - user needs to log in manually once
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Auto-login failed: $e');
+      _setLoading(false);
+      return false;
+    }
   }
 
   Future<void> signIn(String email, String password) async {
@@ -54,9 +138,17 @@ class AuthProvider with ChangeNotifier {
     _clearError();
     try {
       await _authService.signIn(email, password);
+
+      // If biometric is enabled, store the password for future auto-login
       if (_isBiometricEnabled) {
-        await _secureStorage.write(key: 'email', value: email);
-        await _secureStorage.write(key: 'password', value: password);
+        final storedEmail = await _secureStorage.read(key: 'biometric_email');
+        if (storedEmail == email) {
+          // Same user, store password
+          await _secureStorage.write(
+            key: 'biometric_password',
+            value: password,
+          );
+        }
       }
     } catch (e) {
       _setError(e.toString());
@@ -75,8 +167,8 @@ class AuthProvider with ChangeNotifier {
       );
 
       if (authenticated) {
-        final email = await _secureStorage.read(key: 'email');
-        final password = await _secureStorage.read(key: 'password');
+        final email = await _secureStorage.read(key: 'biometric_email');
+        final password = await _secureStorage.read(key: 'biometric_password');
 
         if (email != null && password != null) {
           await _authService.signIn(email, password);
@@ -106,6 +198,10 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> signOut() async {
+    // Clear biometric password on logout (but keep email/enabled state)
+    if (_isBiometricEnabled) {
+      await _secureStorage.delete(key: 'biometric_password');
+    }
     await _authService.signOut();
   }
 
