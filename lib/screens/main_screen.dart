@@ -68,15 +68,46 @@ class _MainScreenState extends State<MainScreen> {
                           return SwitchListTile(
                             title: Text(l10n.enableBiometrics),
                             value: auth.isBiometricEnabled,
-                            onChanged: (bool value) {
-                              auth.setBiometricEnabled(value);
-                              setState(() {});
+                            onChanged: (bool value) async {
+                              final success = await auth.setBiometricEnabled(
+                                value,
+                                l10n.biometricEnrollmentReason,
+                              );
+
+                              if (context.mounted) {
+                                if (value && success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        l10n.biometricEnrollmentSuccess,
+                                      ),
+                                    ),
+                                  );
+                                } else if (value && !success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        l10n.biometricEnrollmentFailed,
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                } else if (!value) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.biometricDisabled),
+                                    ),
+                                  );
+                                }
+                                setState(() {});
+                              }
                             },
                             contentPadding: EdgeInsets.zero,
                           );
                         },
                       ),
                     ),
+
                   PopupMenuItem<String>(
                     value: 'logout',
                     child: ListTile(

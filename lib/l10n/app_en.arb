@@ -75,5 +75,11 @@
   "loginWithBiometrics": "Login with Biometrics",
   "biometricReason": "Please authenticate to log in safely",
   "biometricsNotAvailable": "Biometrics not available on this device",
-  "storedCredentialsNotFound": "Stored credentials not found. Please log in with your email and password first."
+  "storedCredentialsNotFound": "Stored credentials not found. Please log in with your email and password first.",
+  "biometricEnrollmentReason": "Authenticate to enable biometric login",
+  "biometricEnrollmentSuccess": "Biometric login enabled successfully!",
+  "biometricEnrollmentFailed": "Failed to enable biometric login. Please try again.",
+  "biometricDisabled": "Biometric login disabled",
+  "authenticating": "Authenticating..."
+
 }
