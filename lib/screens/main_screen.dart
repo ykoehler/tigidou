@@ -31,15 +31,10 @@ class _MainScreenState extends State<MainScreen> {
     final List<Widget> widgetOptions = <Widget>[
       DashboardScreen(
         onNavigate: (widget) {
-          if (widget is HomeScreen) {
-            setState(() => _selectedIndex = 1);
-          } else if (widget is TemplatesScreen) {
-            setState(() => _selectedIndex = 2);
-          } else {
-            Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (context) => widget));
-          }
+          // All navigation from dashboard uses Navigator.push for back arrow
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => widget));
         },
       ),
       const HomeScreen(),
