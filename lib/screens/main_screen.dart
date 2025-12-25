@@ -140,7 +140,28 @@ class _MainScreenState extends State<MainScreen> {
                     Navigator.pop(context);
                   },
                 ),
-                // Divider between main navigation and types
+                // Categories (tags) - same group as main navigation
+                ...todoProvider.activeTags.map(
+                  (tag) => ListTile(
+                    leading: Icon(_getIconForTag(tag), color: Colors.white70),
+                    title: Text(
+                      ToolParser.formatDisplayName(tag),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => CategoryScreen(
+                            title: ToolParser.formatDisplayName(tag),
+                            tagFilter: tag,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                // Divider between main navigation + categories and types
                 if (todoProvider.activeTypes.isNotEmpty) ...[
                   const Padding(
                     padding: EdgeInsets.symmetric(
@@ -176,46 +197,6 @@ class _MainScreenState extends State<MainScreen> {
                             builder: (context) => CategoryScreen(
                               title: ToolParser.formatDisplayName(type),
                               typeFilter: type,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-                // Divider between types and tags
-                if (todoProvider.activeTags.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 8.0,
-                    ),
-                    child: Divider(color: Colors.white24),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      'Categories',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white54,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  ...todoProvider.activeTags.map(
-                    (tag) => ListTile(
-                      leading: Icon(_getIconForTag(tag), color: Colors.white70),
-                      title: Text(
-                        ToolParser.formatDisplayName(tag),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => CategoryScreen(
-                              title: ToolParser.formatDisplayName(tag),
-                              tagFilter: tag,
                             ),
                           ),
                         );

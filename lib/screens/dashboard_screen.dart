@@ -40,15 +40,51 @@ class DashboardScreen extends StatelessWidget {
             ).textTheme.bodyLarge?.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: 32),
-          // Main Todos card
-          _buildNavCard(
-            context: context,
-            title: l10n.todos,
-            icon: Icons.list_alt_rounded,
-            color: Colors.blueAccent,
-            onTap: () => onNavigate(const HomeScreen()),
+          // Todos + Categories (tags) together
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 1 + tags.length, // Todos + tags
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return _buildNavCard(
+                  context: context,
+                  title: l10n.todos,
+                  icon: Icons.list_alt_rounded,
+                  color: Colors.blueAccent,
+                  onTap: () => onNavigate(const HomeScreen()),
+                );
+              }
+
+              final tag = tags[index - 1];
+              IconData icon = Icons.tag_rounded;
+              Color color = Colors.tealAccent;
+
+              if (tag.contains('groceries')) {
+                icon = Icons.shopping_cart_rounded;
+                color = Colors.greenAccent;
+              }
+
+              return _buildNavCard(
+                context: context,
+                title: ToolParser.formatDisplayName(tag),
+                icon: icon,
+                color: color,
+                onTap: () => onNavigate(
+                  CategoryScreen(
+                    title: ToolParser.formatDisplayName(tag),
+                    tagFilter: tag,
+                  ),
+                ),
+              );
+            },
           ),
-          // Types section
+          // Types section (separated by divider)
           if (types.isNotEmpty) ...[
             const SizedBox(height: 24),
             Row(
@@ -99,60 +135,6 @@ class DashboardScreen extends StatelessWidget {
                     CategoryScreen(
                       title: ToolParser.formatDisplayName(type),
                       typeFilter: type,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
-          // Categories (tags) section
-          if (tags.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                const Expanded(child: Divider(color: Colors.white24)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(
-                    'Categories',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: Colors.white54,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const Expanded(child: Divider(color: Colors.white24)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: tags.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemBuilder: (context, index) {
-                final tag = tags[index];
-                IconData icon = Icons.tag_rounded;
-                Color color = Colors.tealAccent;
-
-                if (tag.contains('groceries')) {
-                  icon = Icons.shopping_cart_rounded;
-                  color = Colors.greenAccent;
-                }
-
-                return _buildNavCard(
-                  context: context,
-                  title: ToolParser.formatDisplayName(tag),
-                  icon: icon,
-                  color: color,
-                  onTap: () => onNavigate(
-                    CategoryScreen(
-                      title: ToolParser.formatDisplayName(tag),
-                      tagFilter: tag,
                     ),
                   ),
                 );
