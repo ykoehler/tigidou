@@ -7,7 +7,7 @@ This document tracks the requirements and current status for deploying **Tigidou
 - **Current Version:** `1.0.0+1`
 - **Development Account:** 🔴 Pending
 - **App Store Connect:** 🔴 Pending
-- **Code Signing:** 🔴 Pending
+- **Code Signing:** 🟡 In Progress (Codemagic CLI tools integrated)
 
 ---
 
@@ -23,8 +23,8 @@ This document tracks the requirements and current status for deploying **Tigidou
 ### 2. Assets & Branding
 | Requirement | Status | Note |
 | :--- | :---: | :--- |
-| App Icon (1024x1024) | 🟡 | Configured in `pubspec.yaml` but needs verification. |
-| Splash Screen | ✅ | Configured using `flutter_native_splash`. |
+| App Icon (1024x1024) | ✅ | Configured and verified using `flutter_launcher_icons`. |
+| Splash Screen | ✅ | Configured and verified using `flutter_native_splash`. |
 | Screenshots (iPhone 6.7" & 6.5") | 🔴 | Required for submission. |
 | Screenshots (iPad 12.9") | 🔴 | Required if iPad support is enabled. |
 
@@ -40,16 +40,16 @@ This document tracks the requirements and current status for deploying **Tigidou
 | :--- | :---: | :--- |
 | Bundle Identifier | ✅ | `com.yannickkoehler.tigidou` |
 | App Version / Build Number | ✅ | Currently `1.0.0+1`. |
-| Permissions (Info.plist) | 🟡 | `NSUserNotificationsUsageDescription` added. |
+| Permissions (Info.plist) | ✅ | `NSUserNotificationsUsageDescription` and Biometric permissions added. |
 | Background Modes | ✅ | `fetch` and `remote-notification` added. |
-| "Sign in with Apple" | N/A | Not required (using email/password only). |
+| "Sign in with Apple" | N/A | Not required (using email/password + biometrics). |
 
 ### 5. Deployment & CI/CD
 | Requirement | Status | Note |
 | :--- | :---: | :--- |
 | Distribution Certificate | 🔴 | Created in Apple Developer portal. |
 | Provisioning Profile | 🔴 | Created in Apple Developer portal. |
-| GitHub Actions Secrets | 🟡 | Some work started (Codemagic CLI tools). |
+| GitHub Actions Secrets | ✅ | Configured using `gh cli` and `codemagic-cli-tools` approach. |
 
 ---
 

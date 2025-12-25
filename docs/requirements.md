@@ -1,7 +1,7 @@
 # Product Requirements
 
 ## Overview
-**Tigidou** is a smart Todo application designed to streamline task management through natural language processing and social features. It acts as a personal assistant, understanding context from user input to automatically prioritize and schedule tasks.
+**Tigidou** is a smart Todo application designed to streamline task management through natural language processing and organizational tools. It acts as a personal assistant, understanding context from user input to automatically prioritize and schedule tasks.
 
 ## GitHub Project
 > [!NOTE]
@@ -12,35 +12,43 @@
 ### 1. Task Management
 - **Create Todos**: Users can add new tasks with a title.
 - **Smart Parsing (NLP)**: The application automatically extracts metadata from the task description using the `@` syntax.
-    - **Dates**: `@tomorrow`, `@today`, `@date:2023-12-31`
+    - **Dates**: `@tomorrow`, `@today`, `@date:2023-12-31`, `@2days`, `@monday`
     - **Times**: `@14h`, `@14:00`, `@time:14h`
-    - **Person Assignment**: `@username`, `@person:john`
+    - **Person Assignment**: `@username`, `@person:john` (automatically maps to "People" list).
+- **Hierarchical Tagging**: Use `#` to categorize tasks with nested paths (e.g., `#work.urgent`, `#personal.shopping`).
+    - The system automatically "explodes" tags (e.g., `#a.b.c` becomes `#a`, `#a.b`, and `#a.b.c`).
 - **List View**: Displays tasks filtering by status (completed/active).
-- **Search**: Real-time filtering of tasks by title.
+- **Search**: Real-time filtering of tasks by title and tags.
     - **Draft Preview**: If no existing task matches the search query, a "Draft" preview shows how the new task would look with parsed metadata.
+    - **Focus Retention**: Search bar retains focus during input for seamless item creation.
 
-### 2. Social Features
-- **People Management**: Users can manage a list of people they collaborate with.
-- **Task Association**: Tasks can be linked to specific people using their `@username` in the task title.
-- **Person Profile**: Viewing a person shows all tasks associated with them.
+### 2. Social & People
+- **People Management**: Dedicated screen to manage collaborators and contacts.
+- **Task Association**: Tasks are automatically linked to people if they are `@mentioned` in the title.
+- **Person Profile**: Viewing a person shows all tasks (active and completed) associated with them.
 
-### 3. Authentication
-- **Firebase Auth**: Secure login and registration.
+### 3. Authentication & Security
+- **Firebase Auth**: Secure login and registration with email/password.
+- **Biometric Login**: Support for Face ID and Touch ID (iOS) for quick access.
 - **Persistent Session**: Users remain logged in across app restarts.
+- **Data Isolation**: Firestore security rules ensure users can only access their own data.
 
 ### 4. User Experience
-- **Theme**: Dark mode with a signature "Tigidou Blue" gradient background.
-- **Localization**: Full support for English (`en`) and French (`fr`), automatically detected based on system settings.
-- **Responsive Design**: Optimized for mobile but functional on desktop/web.
+- **Theme**: Premium Dark mode with a signature "Tigidou Blue" gradient background (`GradientScaffold`).
+- **Localization**: Full support for English (`en`) and French (`fr`), including date/time formats.
+- **App Icon & Splash**: Custom branding with a transparent logo and thematic splash screen.
 
 ## Technical Architecture
 - **Framework**: Flutter (Mobile, Web, macOS).
 - **State Management**: Provider.
-- **Backend/Auth**: Firebase.
+- **Backend/Auth**: Firebase (Firestore, Auth).
 - **Testing**:
     - **Unit/Widget**: `flutter test`
-    - **Integration**: Patrol / `flutter test` (web/macos)
-    - **CI/CD**: Lefthook (pre-commit tests).
+    - **Integration**: Patrol (Native interactions, Firebase Emulator).
+    - **CI/CD**: GitHub Actions + Codemagic CLI for iOS signing and deployment.
 
 ## Future Roadmap
-*(This section to be populated based on future planning)*
+- **Collaboration**: Sharing specific tags or lists with other users.
+- **Smart Reminders**: Push notifications based on parsed `@time` and `@date`.
+- **Global Search**: Search across people, tags, and todos simultaneously.
+- **Voice Input**: Create tasks using voice commands and NLP parsing.

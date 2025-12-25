@@ -5,6 +5,9 @@ class GradientScaffold extends StatelessWidget {
   final AppBar? appBar;
   final Widget? floatingActionButton;
   final Widget? bottomNavigationBar;
+  final Widget? drawer;
+  final Widget? endDrawer;
+  final GlobalKey<ScaffoldState>? scaffoldKey;
 
   const GradientScaffold({
     super.key,
@@ -12,13 +15,19 @@ class GradientScaffold extends StatelessWidget {
     this.appBar,
     this.floatingActionButton,
     this.bottomNavigationBar,
+    this.drawer,
+    this.endDrawer,
+    this.scaffoldKey,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       extendBodyBehindAppBar: true,
       appBar: appBar,
+      drawer: drawer,
+      endDrawer: endDrawer,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
       body: Container(
@@ -29,18 +38,7 @@ class GradientScaffold extends StatelessWidget {
             colors: [Colors.blue.shade900, Colors.black],
           ),
         ),
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: appBar != null
-                  ? kToolbarHeight + MediaQuery.of(context).padding.top
-                  : MediaQuery.of(context).padding.top,
-            ),
-            child: body,
-          ),
-        ),
+        child: SafeArea(top: appBar != null, bottom: false, child: body),
       ),
     );
   }
