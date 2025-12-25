@@ -58,11 +58,41 @@ class ToolParser {
     double? quantity;
     double? price;
 
-    // Regex to find all @tokens, #hashtags, !types, and $prices
-    final tokenRegex = RegExp(r'(@|#|!|\$)([a-zA-Z0-9:\-\.]+)');
+    // Regex to find all @tokens, #hashtags, !types
+    // Note: $price is handled separately with stricter rules
+    final tokenRegex = RegExp(r'(@|#|!)([a-zA-Z0-9:\-\.\$]+)');
+
+    // Price regex: $15.00, $15, $1,234.56 ($ followed by digits, periods, commas only)
+    final priceRegex = RegExp(
+      r'\$(\d{1,3}(,\d{3})*(\.\d{1,2})?|\d+(\.\d{1,2})?)',
+    );
 
     // Separate regex for quantities like 2x, 1.5x, q:2
     final qtyRegex = RegExp(r'\b(\d+(\.\d+)?)(x|qty)\b|\bq:(\d+(\.\d+)?)\b');
+
+    // First, parse standalone $price patterns
+    final priceMatches = priceRegex.allMatches(input);
+    for (final match in priceMatches) {
+      final fullMatch = match.group(0)!;
+      final priceValue = match.group(1)!.replaceAll(',', '');
+
+      // Skip if this is part of an @$15.00 pattern (will be handled by tokenRegex)
+      final beforeIndex = match.start - 1;
+      if (beforeIndex >= 0 && input[beforeIndex] == '@') {
+        continue;
+      }
+
+      price = double.tryParse(priceValue);
+      tags.add(
+        ToolTag(
+          type: ToolType.price,
+          originalText: fullMatch,
+          data: priceValue,
+          startIndex: match.start,
+          endIndex: match.end,
+        ),
+      );
+    }
 
     final matches = tokenRegex.allMatches(input);
 
@@ -119,24 +149,29 @@ class ToolParser {
         continue;
       }
 
-      if (prefix == '\$') {
-        price = double.tryParse(content);
-        tags.add(
-          ToolTag(
-            type: ToolType.price,
-            originalText: fullMatch,
-            data: content,
-            startIndex: startIndex,
-            endIndex: endIndex,
-          ),
-        );
-        continue;
-      }
-
       // Handle @ tools
       ToolType type = ToolType.unknown;
       ToolType? probableType;
       String data = content;
+
+      // Check for @$15.00 shortcut (price)
+      if (content.startsWith('\$')) {
+        final priceStr = content.substring(1).replaceAll(',', '');
+        final parsedPrice = double.tryParse(priceStr);
+        if (parsedPrice != null) {
+          price = parsedPrice;
+          tags.add(
+            ToolTag(
+              type: ToolType.price,
+              originalText: fullMatch,
+              data: priceStr,
+              startIndex: startIndex,
+              endIndex: endIndex,
+            ),
+          );
+          continue;
+        }
+      }
 
       // Check for explicit tool syntax: tool:data
       final firstColonIndex = content.indexOf(':');
@@ -161,6 +196,23 @@ class ToolParser {
           if (!hashtags.contains('person')) hashtags.add('person');
           if (!hashtags.contains(toolData)) hashtags.add(toolData);
           handled = true;
+        } else if (toolName == 'price') {
+          // @price:15.00 or @price:$15.00
+          final priceStr = toolData.replaceAll('\$', '').replaceAll(',', '');
+          final parsedPrice = double.tryParse(priceStr);
+          if (parsedPrice != null) {
+            price = parsedPrice;
+            tags.add(
+              ToolTag(
+                type: ToolType.price,
+                originalText: fullMatch,
+                data: priceStr,
+                startIndex: startIndex,
+                endIndex: endIndex,
+              ),
+            );
+            continue;
+          }
         }
       }
 

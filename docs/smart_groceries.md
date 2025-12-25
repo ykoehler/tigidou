@@ -11,8 +11,16 @@ Tigidou uses special prefixes to identify different types of data within your re
 | `!` | Record Type | `IGA !store.groceries` | Identifies the record type. Can include a category. |
 | `@` | Mention | `@IGA` | Links a record to a person or place. |
 | `#` | Group | `#groceries` | Organizes records and triggers smart lookups. |
-| `$` | Price | `$4.50` | Specifies a monetary value. |
+| `$` | Price | `$4.50` | Specifies a monetary value (shortcut). |
+| `@$` | Price | `@$4.50` | Alternative price syntax via @ mention. |
+| `@price:` | Price | `@price:4.50` | Explicit price attribute (with or without `$`). |
 | `[n]x` | Quantity | `2x` | Specifies a quantity (also supports `qty:2`, `2qty`). |
+
+> [!NOTE]
+> **Price Shortcuts**: All three price syntaxes are equivalent:
+> - `$15.00` — must be followed only by digits, periods, or commas
+> - `@$15.00` — the `@` prefix with `$` immediately after
+> - `@price:15.00` or `@price:$15.00` — explicit attribute syntax
 
 ## Feature: Best Price Lookup
 
