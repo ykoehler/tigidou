@@ -6,6 +6,7 @@ class Todo {
   final String? group;
   final String userId;
   final List<String> sharedWith;
+  final List<String> tags;
 
   Todo({
     required this.id,
@@ -15,6 +16,7 @@ class Todo {
     this.group,
     required this.userId,
     this.sharedWith = const [],
+    this.tags = const [],
   });
 
   factory Todo.fromMap(Map<String, dynamic> map, String id) {
@@ -28,6 +30,7 @@ class Todo {
       group: map['group'],
       userId: map['userId'] ?? '',
       sharedWith: List<String>.from(map['sharedWith'] ?? []),
+      tags: List<String>.from(map['tags'] ?? []),
     );
   }
 
@@ -39,6 +42,7 @@ class Todo {
       'group': group,
       'userId': userId,
       'sharedWith': sharedWith,
+      'tags': tags,
     };
   }
 }

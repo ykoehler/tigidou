@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
 import '../widgets/gradient_scaffold.dart';
+import '../providers/todo_provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -116,7 +117,8 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ),
       ),
-      body: Center(child: widgetOptions.elementAt(_selectedIndex)),
+      body: widgetOptions.elementAt(_selectedIndex),
+      floatingActionButton: _buildFloatingActionButton(context, l10n),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.transparent,
@@ -155,6 +157,73 @@ class _MainScreenState extends State<MainScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget? _buildFloatingActionButton(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    switch (_selectedIndex) {
+      case 1: // Todos
+        return FloatingActionButton(
+          onPressed: () {
+            _showAddTodoDialog(context, l10n);
+          },
+          tooltip: l10n.addTodo,
+          child: const Icon(Icons.add),
+        );
+      case 2: // People
+        return FloatingActionButton(
+          onPressed: () {
+            _showAddTodoDialog(context, l10n, defaultText: '#person ');
+          },
+          tooltip: l10n.addPersonDialogTitle,
+          child: const Icon(Icons.add),
+        );
+      default:
+        return null;
+    }
+  }
+
+  void _showAddTodoDialog(
+    BuildContext context,
+    AppLocalizations l10n, {
+    String defaultText = '',
+  }) {
+    final TextEditingController controller = TextEditingController(
+      text: defaultText,
+    );
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(l10n.addTodoDialogTitle),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(hintText: l10n.addTodoHint),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                if (controller.text.isNotEmpty) {
+                  Provider.of<TodoProvider>(
+                    context,
+                    listen: false,
+                  ).addTodo(controller.text, null);
+                  Navigator.pop(context);
+                }
+              },
+              child: Text(l10n.add),
+            ),
+          ],
+        );
+      },
     );
   }
 }

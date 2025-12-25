@@ -33,14 +33,10 @@ class GradientScaffold extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          top: false,
+          top: true,
           bottom: false,
           child: Padding(
-            padding: EdgeInsets.only(
-              top: appBar != null
-                  ? kToolbarHeight + MediaQuery.of(context).padding.top
-                  : MediaQuery.of(context).padding.top,
-            ),
+            padding: EdgeInsets.only(top: appBar != null ? kToolbarHeight : 0),
             child: body,
           ),
         ),

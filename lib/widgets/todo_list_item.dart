@@ -2,9 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../models/person_model.dart';
 import '../models/todo_model.dart';
-import '../providers/person_provider.dart';
 import '../providers/todo_provider.dart';
 import '../utils/tool_parser.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
@@ -43,176 +41,153 @@ class _TodoListItemState extends State<TodoListItem> {
     final parsedResult = ToolParser.parse(widget.todo.title);
     final tags = parsedResult.tags;
 
-    return Consumer<PersonProvider>(
-      builder: (context, personProvider, child) {
-        return StreamBuilder<List<Person>>(
-          stream: personProvider.people,
-          builder: (context, snapshot) {
-            final people = snapshot.data ?? [];
-
-            return MouseRegion(
-              onEnter: (_) => setState(() => _isHovered = true),
-              onExit: (_) => setState(() => _isHovered = false),
-              child: Column(
-                children: [
-                  ListTile(
-                    onTap: () {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Column(
+        children: [
+          ListTile(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+              widget.onTap?.call();
+            },
+            leading: Checkbox(
+              value: widget.todo.isCompleted,
+              onChanged: widget.readOnly
+                  ? null
+                  : (bool? value) {
+                      Provider.of<TodoProvider>(
+                        context,
+                        listen: false,
+                      ).toggleTodoStatus(widget.todo);
+                    },
+            ),
+            title: RichText(
+              text: TextSpan(
+                style: DefaultTextStyle.of(context).style.copyWith(
+                  decoration: widget.todo.isCompleted
+                      ? TextDecoration.lineThrough
+                      : null,
+                ),
+                children: _buildTextSpans(widget.todo.title, tags),
+              ),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.todo.dueDate != null || _isHovered)
+                  IconButton(
+                    icon: Icon(_isExpanded ? Icons.remove : Icons.add),
+                    onPressed: () {
                       setState(() {
                         _isExpanded = !_isExpanded;
                       });
-                      widget.onTap?.call();
                     },
-                    leading: Checkbox(
-                      value: widget.todo.isCompleted,
-                      onChanged: widget.readOnly
-                          ? null
-                          : (bool? value) {
-                              Provider.of<TodoProvider>(
-                                context,
-                                listen: false,
-                              ).toggleTodoStatus(widget.todo);
-                            },
-                    ),
-                    title: RichText(
-                      text: TextSpan(
-                        style: DefaultTextStyle.of(context).style.copyWith(
-                          decoration: widget.todo.isCompleted
-                              ? TextDecoration.lineThrough
-                              : null,
-                        ),
-                        children: _buildTextSpans(
-                          widget.todo.title,
-                          tags,
-                          people,
-                        ),
-                      ),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (widget.todo.dueDate != null || _isHovered)
-                          IconButton(
-                            icon: Icon(_isExpanded ? Icons.remove : Icons.add),
-                            onPressed: () {
-                              setState(() {
-                                _isExpanded = !_isExpanded;
-                              });
-                            },
-                          ),
-                        if (!widget.readOnly)
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () {
-                              Provider.of<TodoProvider>(
-                                context,
-                                listen: false,
-                              ).deleteTodo(widget.todo.id);
-                            },
-                          ),
-                      ],
-                    ),
                   ),
-                  if (_isExpanded)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 8.0,
+                if (!widget.readOnly)
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      Provider.of<TodoProvider>(
+                        context,
+                        listen: false,
+                      ).deleteTodo(widget.todo.id);
+                    },
+                  ),
+              ],
+            ),
+          ),
+          if (_isExpanded)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.alarm, size: 16, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  if (widget.todo.dueDate != null) ...[
+                    Text(
+                      AppLocalizations.of(context)!.due(
+                        DateFormat(
+                          'MMM d, y h:mm a',
+                        ).format(widget.todo.dueDate!),
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.alarm, size: 16, color: Colors.grey),
-                          const SizedBox(width: 8),
-                          if (widget.todo.dueDate != null) ...[
-                            Text(
-                              AppLocalizations.of(context)!.due(
-                                DateFormat(
-                                  'MMM d, y h:mm a',
-                                ).format(widget.todo.dueDate!),
-                              ),
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                            const SizedBox(width: 16),
-                            Text(
-                              AppLocalizations.of(context)!.reminder,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          ] else ...[
-                            TextButton(
-                              onPressed: widget.readOnly
-                                  ? null
-                                  : () async {
-                                      final date = await showDatePicker(
-                                        context: context,
-                                        initialDate: DateTime.now(),
-                                        firstDate: DateTime.now(),
-                                        lastDate: DateTime(2100),
-                                      );
-                                      if (!context.mounted) return;
-                                      if (date != null) {
-                                        final time = await showTimePicker(
-                                          context: context,
-                                          initialTime: TimeOfDay.now(),
-                                        );
-                                        if (!context.mounted) return;
-                                        if (time != null) {
-                                          final newDueDate = DateTime(
-                                            date.year,
-                                            date.month,
-                                            date.day,
-                                            time.hour,
-                                            time.minute,
-                                          );
-                                          final updatedTodo = Todo(
-                                            id: widget.todo.id,
-                                            title: widget.todo.title,
-                                            isCompleted:
-                                                widget.todo.isCompleted,
-                                            dueDate: newDueDate,
-                                            userId: widget.todo.userId,
-                                            sharedWith: widget.todo.sharedWith,
-                                          );
-                                          Provider.of<TodoProvider>(
-                                            context,
-                                            listen: false,
-                                          ).updateTodo(updatedTodo);
-                                        }
-                                      }
-                                    },
-                              child: Text(
-                                AppLocalizations.of(context)!.setDueDate,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.reminderSetDateFirst,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          ],
-                        ],
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      AppLocalizations.of(context)!.reminder,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
+                  ] else ...[
+                    TextButton(
+                      onPressed: widget.readOnly
+                          ? null
+                          : () async {
+                              final date = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(2100),
+                              );
+                              if (!context.mounted) return;
+                              if (date != null) {
+                                final time = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now(),
+                                );
+                                if (!context.mounted) return;
+                                if (time != null) {
+                                  final newDueDate = DateTime(
+                                    date.year,
+                                    date.month,
+                                    date.day,
+                                    time.hour,
+                                    time.minute,
+                                  );
+                                  final updatedTodo = Todo(
+                                    id: widget.todo.id,
+                                    title: widget.todo.title,
+                                    isCompleted: widget.todo.isCompleted,
+                                    dueDate: newDueDate,
+                                    userId: widget.todo.userId,
+                                    sharedWith: widget.todo.sharedWith,
+                                    tags: widget.todo.tags,
+                                  );
+                                  Provider.of<TodoProvider>(
+                                    context,
+                                    listen: false,
+                                  ).updateTodo(updatedTodo);
+                                }
+                              }
+                            },
+                      child: Text(AppLocalizations.of(context)!.setDueDate),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      AppLocalizations.of(context)!.reminderSetDateFirst,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
                 ],
               ),
-            );
-          },
-        );
-      },
+            ),
+        ],
+      ),
     );
   }
 
-  List<InlineSpan> _buildTextSpans(
-    String text,
-    List<ToolTag> tags,
-    List<Person> people,
-  ) {
+  List<InlineSpan> _buildTextSpans(String text, List<ToolTag> tags) {
     if (tags.isEmpty) {
       return [TextSpan(text: text)];
     }
@@ -231,28 +206,9 @@ class _TodoListItemState extends State<TodoListItem> {
       WidgetSpan? iconSpan;
 
       if (tag.type == ToolType.person) {
-        final username = tag.data;
-        final exists = people.any((p) => p.username == username);
-
-        if (exists) {
-          color = Colors.blue;
-        } else {
-          color = Colors.grey;
-          // Add warning icon
-          iconSpan = WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: GestureDetector(
-              onTap: () => _showAddPersonDialog(context, username),
-              child: const Padding(
-                padding: EdgeInsets.only(left: 4.0),
-                child: Icon(Icons.person_add, size: 16, color: Colors.orange),
-              ),
-            ),
-          );
-          // Make text clickable too
-          recognizer = TapGestureRecognizer()
-            ..onTap = () => _showAddPersonDialog(context, username);
-        }
+        color = Colors.blue;
+      } else if (tag.type == ToolType.group) {
+        color = Colors.orangeAccent;
       } else if (tag.type == ToolType.date || tag.type == ToolType.time) {
         color = Colors.green;
       } else if (tag.type == ToolType.unknown) {
@@ -266,15 +222,9 @@ class _TodoListItemState extends State<TodoListItem> {
           icon = Icons.calendar_today;
           iconColor = Colors.orange;
           onTap = () => _showDatePickerForTag(context);
-        } else if (tag.probableType == ToolType.person) {
-          // Should not happen given current parser logic for unknown, but safe to handle
-          icon = Icons.person_add;
-          iconColor = Colors.orange;
-          onTap = () => _showAddPersonDialog(context, tag.data);
         } else {
           // Generic unknown
           onTap = () {
-            // Maybe show a dialog explaining it's unknown?
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(AppLocalizations.of(context)!.unknownTagFormat),
@@ -319,57 +269,7 @@ class _TodoListItemState extends State<TodoListItem> {
     return spans;
   }
 
-  void _showAddPersonDialog(BuildContext context, String username) {
-    final TextEditingController displayNameController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            AppLocalizations.of(context)!.addPersonWithUsername(username),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: displayNameController,
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.displayNameHint,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(AppLocalizations.of(context)!.cancel),
-            ),
-            TextButton(
-              onPressed: () {
-                if (displayNameController.text.isNotEmpty) {
-                  Provider.of<PersonProvider>(
-                    context,
-                    listen: false,
-                  ).addPerson(username, displayNameController.text);
-                  Navigator.pop(context);
-                }
-              },
-              child: Text(AppLocalizations.of(context)!.add),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _showDatePickerForTag(BuildContext context) async {
-    // Allow user to pick a date to associate with the todo
-    // This updates the todo's due date, but doesn't change the text tag (as per "preserve format")
-    // Or maybe we should ask if they want to replace the tag?
-    // User said "correct with suggestion".
-    // For now, let's just set the due date.
-
     final date = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -398,6 +298,7 @@ class _TodoListItemState extends State<TodoListItem> {
           dueDate: newDueDate,
           userId: widget.todo.userId,
           sharedWith: widget.todo.sharedWith,
+          tags: widget.todo.tags,
         );
         Provider.of<TodoProvider>(
           context,
