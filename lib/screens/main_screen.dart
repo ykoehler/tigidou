@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'templates_screen.dart';
 import 'dashboard_screen.dart';
+import 'category_screen.dart';
 import '../widgets/template_builder.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
 import '../widgets/gradient_scaffold.dart';
 import '../providers/todo_provider.dart';
+import '../utils/tool_parser.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,11 +20,13 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final auth = context.watch<AuthProvider>();
+    final todoProvider = context.watch<TodoProvider>();
 
     final List<Widget> widgetOptions = <Widget>[
       DashboardScreen(
@@ -43,6 +47,7 @@ class _MainScreenState extends State<MainScreen> {
     ];
 
     return GradientScaffold(
+      scaffoldKey: _scaffoldKey,
       appBar: AppBar(
         title: Image.asset(
           'assets/images/logo_banner.png',
@@ -50,8 +55,189 @@ class _MainScreenState extends State<MainScreen> {
           fit: BoxFit.contain,
         ),
         centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const CircleAvatar(
+              radius: 16,
+              backgroundColor: Colors.white24,
+              child: Icon(Icons.person, color: Colors.white, size: 20),
+            ),
+            onPressed: () {
+              _scaffoldKey.currentState?.openEndDrawer();
+            },
+          ),
+        ],
       ),
+      // Left drawer: Navigation between groups/types
       drawer: Drawer(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0D47A1), Color(0xFF1976D2)],
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Navigate',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(
+                    Icons.dashboard_rounded,
+                    color: Colors.white,
+                  ),
+                  title: Text(
+                    l10n.home,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  selected: _selectedIndex == 0,
+                  selectedTileColor: Colors.white12,
+                  onTap: () {
+                    setState(() => _selectedIndex = 0);
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(
+                    Icons.list_alt_rounded,
+                    color: Colors.white,
+                  ),
+                  title: Text(
+                    l10n.todos,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  selected: _selectedIndex == 1,
+                  selectedTileColor: Colors.white12,
+                  onTap: () {
+                    setState(() => _selectedIndex = 1);
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(
+                    Icons.format_list_bulleted_rounded,
+                    color: Colors.white,
+                  ),
+                  title: Text(
+                    l10n.templates,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  selected: _selectedIndex == 2,
+                  selectedTileColor: Colors.white12,
+                  onTap: () {
+                    setState(() => _selectedIndex = 2);
+                    Navigator.pop(context);
+                  },
+                ),
+                // Divider between main navigation and types
+                if (todoProvider.activeTypes.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                    child: Divider(color: Colors.white24),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      'Types',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.white54,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  ...todoProvider.activeTypes.map(
+                    (type) => ListTile(
+                      leading: Icon(
+                        _getIconForType(type),
+                        color: Colors.white70,
+                      ),
+                      title: Text(
+                        ToolParser.formatDisplayName(type),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => CategoryScreen(
+                              title: ToolParser.formatDisplayName(type),
+                              typeFilter: type,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+                // Divider between types and tags
+                if (todoProvider.activeTags.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                    child: Divider(color: Colors.white24),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      'Categories',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.white54,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  ...todoProvider.activeTags.map(
+                    (tag) => ListTile(
+                      leading: Icon(_getIconForTag(tag), color: Colors.white70),
+                      title: Text(
+                        ToolParser.formatDisplayName(tag),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => CategoryScreen(
+                              title: ToolParser.formatDisplayName(tag),
+                              tagFilter: tag,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+                const Spacer(),
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    'v0.1.0',
+                    style: TextStyle(color: Colors.white24, fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      // Right drawer: Profile/Settings
+      endDrawer: Drawer(
         child: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -112,14 +298,6 @@ class _MainScreenState extends State<MainScreen> {
                   auth.signOut();
                 },
               ),
-              const Spacer(),
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'v0.1.0',
-                  style: TextStyle(color: Colors.white24, fontSize: 12),
-                ),
-              ),
             ],
           ),
         ),
@@ -165,6 +343,24 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ),
     );
+  }
+
+  IconData _getIconForType(String type) {
+    switch (type) {
+      case 'store':
+        return Icons.store_rounded;
+      case 'person':
+        return Icons.person_rounded;
+      default:
+        return Icons.category_rounded;
+    }
+  }
+
+  IconData _getIconForTag(String tag) {
+    if (tag.contains('groceries')) {
+      return Icons.shopping_cart_rounded;
+    }
+    return Icons.tag_rounded;
   }
 
   Widget? _buildFloatingActionButton(

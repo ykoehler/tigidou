@@ -32,6 +32,12 @@ class MockTodoProvider extends ChangeNotifier implements TodoProvider {
   List<String> get activeCategories => [];
 
   @override
+  List<String> get activeTypes => [];
+
+  @override
+  List<String> get activeTags => [];
+
+  @override
   Map<String, List<Todo>> get groupedTodos => {};
 
   @override

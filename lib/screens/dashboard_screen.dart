@@ -16,7 +16,8 @@ class DashboardScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     final provider = Provider.of<TodoProvider>(context);
-    final categories = provider.activeCategories;
+    final types = provider.activeTypes;
+    final tags = provider.activeTags;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -39,59 +40,126 @@ class DashboardScreen extends StatelessWidget {
             ).textTheme.bodyLarge?.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: 32),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 1 + categories.length, // Todos + dynamic categories
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return _buildNavCard(
-                  context: context,
-                  title: l10n.todos,
-                  icon: Icons.list_alt_rounded,
-                  color: Colors.blueAccent,
-                  onTap: () => onNavigate(const HomeScreen()),
-                );
-              }
-
-              final category = categories[index - 1];
-              IconData icon = Icons.folder_open_rounded;
-              Color color = Colors.blueGrey;
-              bool isType = false;
-
-              if (category.startsWith('store')) {
-                icon = Icons.store_rounded;
-                color = Colors.purpleAccent;
-                isType = true;
-              } else if (category == 'person') {
-                icon = Icons.people_alt_rounded;
-                color = Colors.orangeAccent;
-                isType = true;
-              } else if (category == 'groceries') {
-                icon = Icons.shopping_cart_rounded;
-                color = Colors.greenAccent;
-              }
-
-              return _buildNavCard(
-                context: context,
-                title: ToolParser.formatDisplayName(category),
-                icon: icon,
-                color: color,
-                onTap: () => onNavigate(
-                  CategoryScreen(
-                    title: ToolParser.formatDisplayName(category),
-                    tagFilter: isType ? null : category,
-                    typeFilter: isType ? category : null,
+          // Main Todos card
+          _buildNavCard(
+            context: context,
+            title: l10n.todos,
+            icon: Icons.list_alt_rounded,
+            color: Colors.blueAccent,
+            onTap: () => onNavigate(const HomeScreen()),
+          ),
+          // Types section
+          if (types.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                const Expanded(child: Divider(color: Colors.white24)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(
+                    'Types',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Colors.white54,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              );
-            },
-          ),
+                const Expanded(child: Divider(color: Colors.white24)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: types.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+              ),
+              itemBuilder: (context, index) {
+                final type = types[index];
+                IconData icon = Icons.category_rounded;
+                Color color = Colors.blueGrey;
+
+                if (type.startsWith('store')) {
+                  icon = Icons.store_rounded;
+                  color = Colors.purpleAccent;
+                } else if (type == 'person') {
+                  icon = Icons.people_alt_rounded;
+                  color = Colors.orangeAccent;
+                }
+
+                return _buildNavCard(
+                  context: context,
+                  title: ToolParser.formatDisplayName(type),
+                  icon: icon,
+                  color: color,
+                  onTap: () => onNavigate(
+                    CategoryScreen(
+                      title: ToolParser.formatDisplayName(type),
+                      typeFilter: type,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+          // Categories (tags) section
+          if (tags.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                const Expanded(child: Divider(color: Colors.white24)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(
+                    'Categories',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Colors.white54,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const Expanded(child: Divider(color: Colors.white24)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: tags.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+              ),
+              itemBuilder: (context, index) {
+                final tag = tags[index];
+                IconData icon = Icons.tag_rounded;
+                Color color = Colors.tealAccent;
+
+                if (tag.contains('groceries')) {
+                  icon = Icons.shopping_cart_rounded;
+                  color = Colors.greenAccent;
+                }
+
+                return _buildNavCard(
+                  context: context,
+                  title: ToolParser.formatDisplayName(tag),
+                  icon: icon,
+                  color: color,
+                  onTap: () => onNavigate(
+                    CategoryScreen(
+                      title: ToolParser.formatDisplayName(tag),
+                      tagFilter: tag,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+          const SizedBox(height: 24),
         ],
       ),
     );

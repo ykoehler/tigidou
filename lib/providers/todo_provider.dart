@@ -51,6 +51,30 @@ class TodoProvider with ChangeNotifier {
     return categories.toList()..sort();
   }
 
+  /// Returns a list of unique record types (e.g., store, person) that have at least one record.
+  List<String> get activeTypes {
+    final Set<String> types = {};
+    for (var todo in _allTodos) {
+      if (todo.recordType != null && todo.recordType != 'template') {
+        types.add(todo.recordType!);
+      }
+    }
+    return types.toList()..sort();
+  }
+
+  /// Returns a list of unique hashtags (excluding 'person') that have at least one record.
+  List<String> get activeTags {
+    final Set<String> tags = {};
+    for (var todo in _allTodos) {
+      for (var tag in todo.tags) {
+        if (tag != 'person') {
+          tags.add(tag);
+        }
+      }
+    }
+    return tags.toList()..sort();
+  }
+
   TodoProvider() {
     _notificationService.initialize();
     _databaseService.todos.listen((todos) {

@@ -6,6 +6,8 @@ class GradientScaffold extends StatelessWidget {
   final Widget? floatingActionButton;
   final Widget? bottomNavigationBar;
   final Widget? drawer;
+  final Widget? endDrawer;
+  final GlobalKey<ScaffoldState>? scaffoldKey;
 
   const GradientScaffold({
     super.key,
@@ -14,14 +16,18 @@ class GradientScaffold extends StatelessWidget {
     this.floatingActionButton,
     this.bottomNavigationBar,
     this.drawer,
+    this.endDrawer,
+    this.scaffoldKey,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       extendBodyBehindAppBar: true,
       appBar: appBar,
       drawer: drawer,
+      endDrawer: endDrawer,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
       body: Container(
