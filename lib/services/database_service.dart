@@ -38,8 +38,11 @@ class DatabaseService {
   Future<String> addTodo(
     String title,
     DateTime? dueDate,
-    List<String> tags,
-  ) async {
+    List<String> tags, {
+    String? recordType,
+    double? quantity,
+    double? price,
+  }) async {
     final uid = _currentUserId;
     if (uid == null) throw Exception('User not authenticated');
 
@@ -50,6 +53,9 @@ class DatabaseService {
       'userId': uid,
       'sharedWith': [],
       'tags': tags,
+      'recordType': recordType,
+      'quantity': quantity,
+      'price': price,
     });
     return docRef.id;
   }

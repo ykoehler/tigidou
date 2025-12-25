@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 
-enum ToolType { date, time, person, group, unknown }
+enum ToolType {
+  date,
+  time,
+  person,
+  group,
+  recordType,
+  quantity,
+  price,
+  unknown,
+}
 
 class ToolTag {
   final ToolType type;
@@ -24,11 +33,17 @@ class ToolParseResult {
   final List<ToolTag> tags;
   final DateTime? derivedDate;
   final List<String> hashtags;
+  final String? recordType;
+  final double? quantity;
+  final double? price;
 
   ToolParseResult({
     required this.tags,
     this.derivedDate,
     this.hashtags = const [],
+    this.recordType,
+    this.quantity,
+    this.price,
   });
 }
 
@@ -39,11 +54,15 @@ class ToolParser {
     DateTime now = DateTime.now();
     DateTime? datePart;
     TimeOfDay? timePart;
+    String? recordType;
+    double? quantity;
+    double? price;
 
-    // Regex to find all @tokens and #hashtags
-    // @[a-zA-Z0-9:\-]+ for tools
-    // #([a-zA-Z0-9\.]+) for hierarchical groups
-    final tokenRegex = RegExp(r'(@|#)([a-zA-Z0-9:\-\.]+)');
+    // Regex to find all @tokens, #hashtags, !types, and $prices
+    final tokenRegex = RegExp(r'(@|#|!|\$)([a-zA-Z0-9:\-\.]+)');
+
+    // Separate regex for quantities like 2x, 1.5x, q:2
+    final qtyRegex = RegExp(r'\b(\d+(\.\d+)?)(x|qty)\b|\bq:(\d+(\.\d+)?)\b');
 
     final matches = tokenRegex.allMatches(input);
 
@@ -68,7 +87,6 @@ class ToolParser {
             hashtags.add(currentPath);
           }
         }
-        // Also add individual components (e.g., 'iga' from 'todo.iga')
         for (final part in parts) {
           if (!hashtags.contains(part)) {
             hashtags.add(part);
@@ -78,6 +96,34 @@ class ToolParser {
         tags.add(
           ToolTag(
             type: ToolType.group,
+            originalText: fullMatch,
+            data: content,
+            startIndex: startIndex,
+            endIndex: endIndex,
+          ),
+        );
+        continue;
+      }
+
+      if (prefix == '!') {
+        recordType = content;
+        tags.add(
+          ToolTag(
+            type: ToolType.recordType,
+            originalText: fullMatch,
+            data: content,
+            startIndex: startIndex,
+            endIndex: endIndex,
+          ),
+        );
+        continue;
+      }
+
+      if (prefix == '\$') {
+        price = double.tryParse(content);
+        tags.add(
+          ToolTag(
+            type: ToolType.price,
             originalText: fullMatch,
             data: content,
             startIndex: startIndex,
@@ -126,7 +172,7 @@ class ToolParser {
           datePart = _parseDateData(data, now);
         } else if (_isTime(content)) {
           type = ToolType.time;
-          data = content; // e.g. 14h
+          data = content;
           timePart = _parseTimeData(data);
         } else {
           // Check hints
@@ -139,7 +185,6 @@ class ToolParser {
             type = ToolType.unknown;
             data = content;
 
-            // Hints for unknown
             if (content.toLowerCase().contains('day')) {
               probableType = ToolType.date;
             }
@@ -159,6 +204,31 @@ class ToolParser {
       );
     }
 
+    // Parse quantities
+    final qtyMatches = qtyRegex.allMatches(input);
+    for (final match in qtyMatches) {
+      final fullMatch = match.group(0)!;
+      final val1 = match.group(1); // \d+(\.\d+)?
+      final val2 = match.group(4); // q:\d+(\.\d+)?
+      final value = val1 ?? val2;
+
+      if (value != null) {
+        quantity = double.tryParse(value);
+        tags.add(
+          ToolTag(
+            type: ToolType.quantity,
+            originalText: fullMatch,
+            data: value,
+            startIndex: match.start,
+            endIndex: match.end,
+          ),
+        );
+      }
+    }
+
+    // Sort tags by start index
+    tags.sort((a, b) => a.startIndex.compareTo(b.startIndex));
+
     // Combine date and time
     DateTime? finalDate;
     if (datePart != null || timePart != null) {
@@ -167,10 +237,24 @@ class ToolParser {
       finalDate = DateTime(d.year, d.month, d.day, t.hour, t.minute);
     }
 
+    if (recordType != null) {
+      return ToolParseResult(
+        tags: tags.where((t) => t.type == ToolType.recordType).toList(),
+        derivedDate: null,
+        hashtags: [],
+        recordType: recordType,
+        quantity: null,
+        price: null,
+      );
+    }
+
     return ToolParseResult(
       tags: tags,
       derivedDate: finalDate,
       hashtags: hashtags,
+      recordType: recordType,
+      quantity: quantity,
+      price: price,
     );
   }
 
@@ -285,5 +369,13 @@ class ToolParser {
     ];
     if (query.isEmpty) return suggestions;
     return suggestions.where((s) => s.startsWith(query.toLowerCase())).toList();
+  }
+
+  static String formatDisplayName(String name) {
+    if (name.isEmpty) return name;
+    final parts = name.split('.');
+    final leaf = parts.last;
+    if (leaf.isEmpty) return name;
+    return leaf[0].toUpperCase() + leaf.substring(1);
   }
 }

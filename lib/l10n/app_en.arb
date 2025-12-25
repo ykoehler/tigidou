@@ -1,15 +1,16 @@
 {
   "appTitle": "Tigidou",
-  "@appTitle": {
-    "description": "The title of the application"
+  "home": "Home",
+  "@home": {
+    "description": "Label for the home tab"
   },
-  "todos": "Todos",
+  "todos": "Todo",
   "@todos": {
-    "description": "Label for the todos tab"
+    "description": "Label for the todo tab"
   },
-  "people": "People",
-  "@people": {
-    "description": "Label for the people tab"
+  "templates": "Templates",
+  "@templates": {
+    "description": "Label for the templates tab"
   },
   "addTodo": "Add Todo",
   "@addTodo": {
@@ -21,6 +22,7 @@
   "itsBrand": "It's ",
   "noTodos": "No todos yet. Add one!",
   "addTodoDialogTitle": "Add Todo",
+  "addTemplateDialogTitle": "Add Template",
   "addTodoHint": "Enter todo (e.g., \"Call dad @tomorrow @14h\")",
   "cancel": "Cancel",
   "add": "Add",

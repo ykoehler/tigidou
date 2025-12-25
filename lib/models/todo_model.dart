@@ -7,6 +7,9 @@ class Todo {
   final String userId;
   final List<String> sharedWith;
   final List<String> tags;
+  final String? recordType;
+  final double? quantity;
+  final double? price;
 
   Todo({
     required this.id,
@@ -17,6 +20,9 @@ class Todo {
     required this.userId,
     this.sharedWith = const [],
     this.tags = const [],
+    this.recordType,
+    this.quantity,
+    this.price,
   });
 
   factory Todo.fromMap(Map<String, dynamic> map, String id) {
@@ -31,6 +37,9 @@ class Todo {
       userId: map['userId'] ?? '',
       sharedWith: List<String>.from(map['sharedWith'] ?? []),
       tags: List<String>.from(map['tags'] ?? []),
+      recordType: map['recordType'],
+      quantity: (map['quantity'] as num?)?.toDouble(),
+      price: (map['price'] as num?)?.toDouble(),
     );
   }
 
@@ -43,6 +52,9 @@ class Todo {
       'userId': userId,
       'sharedWith': sharedWith,
       'tags': tags,
+      'recordType': recordType,
+      'quantity': quantity,
+      'price': price,
     };
   }
 }

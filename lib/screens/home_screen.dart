@@ -37,13 +37,48 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  void _onContextualAdd(String groupName) {
+    if (groupName == 'Uncategorized') {
+      _searchController.clear();
+    } else {
+      // Determine if it's a recordType (! prefix) or a hashtag (# prefix)
+      // This is a bit tricky since we only have the raw name here.
+      // But based on HomeScreen grouping logic:
+      // if (todo.recordType != null) group = todo.recordType!;
+      // else if (todo.tags.isNotEmpty) group = todo.tags.first;
+
+      // We can check if it's a known recordType from some source,
+      // but let's assume if it doesn't look like a hashtag it might be a type.
+      // Actually, ToolParser.parse will handle it if we prefix correctly.
+      // User said: !store.grocery type -> "!store.grocery"
+
+      // Let's try to detect if it's a hashtag or recordType.
+      // This is imperfect without full metadata but we can heuristics:
+      // If it starts with a letter, we can try both and see?
+      // No, let's just use the name and let the user decide if they want # or !.
+      // WAIT, the USER said: "!store.grocery type to add a new grocery store, I get a text field ' !store.grocery'"
+
+      // So we need to know if 'groupName' was derived from recordType or tag.
+      // I will update the grouping logic to keep track of the prefix.
+
+      final String prefix =
+          groupName.contains('.') || groupName.startsWith('store') ? '!' : '#';
+      final String text = ' $prefix$groupName';
+      _searchController.text = text;
+      _searchController.selection = TextSelection.fromPosition(
+        const TextPosition(offset: 0),
+      );
+    }
+    _searchFocusNode.requestFocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8.0),
           child: Column(
             children: [
               CompositedTransformTarget(
@@ -112,18 +147,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }).toList();
 
+              // Grouping logic (Priority: recordType, then first tag)
+              final Map<String, List<Todo>> groups = {};
+              for (var todo in filteredTodos) {
+                String group = 'Uncategorized';
+                if (todo.recordType != null) {
+                  group = todo.recordType!;
+                } else if (todo.tags.isNotEmpty) {
+                  group = todo.tags.firstWhere(
+                    (t) => t != 'person',
+                    orElse: () => 'Uncategorized',
+                  );
+                }
+
+                if (!groups.containsKey(group)) {
+                  groups[group] = [];
+                }
+                groups[group]!.add(todo);
+              }
+
               // If list is empty, decide what to show
               if (filteredTodos.isEmpty) {
-                // Case 1: Search query is active - show live preview
+                // ... [DRAFT PREVIEW LOGIC] ...
                 if (_searchQuery.isNotEmpty) {
-                  // Parse the query to get a derived date
                   final parsedResult = ToolParser.parse(_searchQuery);
                   final draftTodo = Todo(
                     id: 'draft',
                     title: _searchQuery,
                     isCompleted: false,
                     dueDate: parsedResult.derivedDate,
-                    userId: '', // Draft not saved yet
+                    userId: '',
                   );
 
                   return SingleChildScrollView(
@@ -163,7 +216,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }
 
-                // Case 2: Search query is empty, and list is empty
                 final activeTodos = todos.where((t) => !t.isCompleted).toList();
                 if (activeTodos.isEmpty) {
                   return Align(
@@ -193,19 +245,45 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               }
 
+              final groupKeys = groups.keys.toList()..sort();
+              // Sort "Uncategorized" to the bottom
+              if (groupKeys.contains('Uncategorized')) {
+                groupKeys.remove('Uncategorized');
+                groupKeys.add('Uncategorized');
+              }
+
               return ListView.builder(
-                itemCount: filteredTodos.length,
+                itemCount: groupKeys.length,
                 itemBuilder: (context, index) {
-                  final todo = filteredTodos[index];
-                  return TodoListItem(
-                    key: ValueKey(todo.id),
-                    todo: todo,
-                    onTap: () {
-                      if (_searchQuery.isNotEmpty) {
-                        _searchController.clear();
-                        FocusScope.of(context).unfocus();
-                      }
-                    },
+                  final groupName = groupKeys[index];
+                  final groupTodos = groups[groupName]!;
+
+                  return ExpansionTile(
+                    title: Text(
+                      ToolParser.formatDisplayName(groupName),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.add, color: Colors.white70),
+                      onPressed: () => _onContextualAdd(groupName),
+                    ),
+                    initiallyExpanded: true,
+                    children: groupTodos.map((todo) {
+                      return TodoListItem(
+                        key: ValueKey(todo.id),
+                        todo: todo,
+                        hideTags: [groupName],
+                        onTap: () {
+                          if (_searchQuery.isNotEmpty) {
+                            _searchController.clear();
+                            FocusScope.of(context).unfocus();
+                          }
+                        },
+                      );
+                    }).toList(),
                   );
                 },
               );

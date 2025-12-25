@@ -11,6 +11,46 @@ class TodoProvider with ChangeNotifier {
   List<Todo> _allTodos = [];
   List<Todo> get allTodos => _allTodos;
 
+  /// Returns a map of todos grouped by their primary category.
+  /// Priority: recordType (if exists), then the first tag, then "Uncategorized".
+  Map<String, List<Todo>> get groupedTodos {
+    final Map<String, List<Todo>> groups = {};
+    for (var todo in _allTodos) {
+      String group = 'Uncategorized';
+      if (todo.recordType != null) {
+        group = todo.recordType!;
+      } else if (todo.tags.isNotEmpty) {
+        // Find first tag that isn't 'person'
+        group = todo.tags.firstWhere(
+          (t) => t != 'person',
+          orElse: () => 'Uncategorized',
+        );
+      }
+
+      if (!groups.containsKey(group)) {
+        groups[group] = [];
+      }
+      groups[group]!.add(todo);
+    }
+    return groups;
+  }
+
+  /// Returns a list of unique categories (tags and types) that have at least one record.
+  List<String> get activeCategories {
+    final Set<String> categories = {};
+    for (var todo in _allTodos) {
+      if (todo.recordType != null && todo.recordType != 'template') {
+        categories.add(todo.recordType!);
+      }
+      for (var tag in todo.tags) {
+        if (tag != 'person') {
+          categories.add(tag);
+        }
+      }
+    }
+    return categories.toList()..sort();
+  }
+
   TodoProvider() {
     _notificationService.initialize();
     _databaseService.todos.listen((todos) {
@@ -45,8 +85,14 @@ class TodoProvider with ChangeNotifier {
     final finalDueDate = parsedResult.derivedDate ?? dueDate;
     final tags = parsedResult.hashtags;
 
-    // We keep the title as is, as requested by the user ("preserve the format")
-    final id = await _databaseService.addTodo(title, finalDueDate, tags);
+    final id = await _databaseService.addTodo(
+      title,
+      finalDueDate,
+      tags,
+      recordType: parsedResult.recordType,
+      quantity: parsedResult.quantity,
+      price: parsedResult.price,
+    );
     if (finalDueDate != null) {
       await _notificationService.scheduleNotification(
         id.hashCode,

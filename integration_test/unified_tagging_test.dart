@@ -78,8 +78,8 @@ Future<void> main() async {
     await $.tester.testTextInput.receiveAction(TextInputAction.done);
     await $.pumpAndSettle();
 
-    // Navigate to People page
-    await $(l10n.people).tap();
+    // Navigate to Templates page
+    await $(l10n.templates).tap();
     await $.pumpAndSettle();
 
     // Verify it appears on the People page
@@ -94,7 +94,7 @@ Future<void> main() async {
     await $.tester.testTextInput.receiveAction(TextInputAction.done);
     await $.pumpAndSettle();
 
-    await $(l10n.people).tap(); // Navigate to People
+    await $(l10n.templates).tap(); // Navigate to Templates
     await $.pumpAndSettle();
 
     expect($(personTagTodo), findsOneWidget);

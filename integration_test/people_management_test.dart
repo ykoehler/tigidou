@@ -22,8 +22,8 @@ void main() {
     await $(l10n.register).tap();
     await $.pumpAndSettle();
 
-    // 2. Go to People tab
-    await $(l10n.people).tap();
+    // 2. Go to Templates tab
+    await $(l10n.templates).tap();
     await $.pumpAndSettle();
 
     // 3. Add a Person
@@ -48,8 +48,8 @@ void main() {
     await $(l10n.add).tap();
     await $.pumpAndSettle();
 
-    // 5. Verify association in People tab
-    await $(l10n.people).tap();
+    // 5. Verify association in Templates tab
+    await $(l10n.templates).tap();
     await $.pumpAndSettle();
 
     // Expand John Doe's entry

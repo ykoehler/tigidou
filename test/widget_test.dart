@@ -29,6 +29,12 @@ class MockTodoProvider extends ChangeNotifier implements TodoProvider {
   List<Todo> get availablePeople => [];
 
   @override
+  List<String> get activeCategories => [];
+
+  @override
+  Map<String, List<Todo>> get groupedTodos => {};
+
+  @override
   Future<String> addTodo(String title, DateTime? dueDate) async {
     lastAddedTitle = title;
     lastAddedDate = dueDate;

@@ -32,14 +32,7 @@ class GradientScaffold extends StatelessWidget {
             colors: [Colors.blue.shade900, Colors.black],
           ),
         ),
-        child: SafeArea(
-          top: true,
-          bottom: false,
-          child: Padding(
-            padding: EdgeInsets.only(top: appBar != null ? kToolbarHeight : 0),
-            child: body,
-          ),
-        ),
+        child: SafeArea(top: appBar != null, bottom: false, child: body),
       ),
     );
   }

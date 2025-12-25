@@ -21,9 +21,15 @@ class SuggestionOverlay extends StatefulWidget {
   State<SuggestionOverlay> createState() => _SuggestionOverlayState();
 }
 
+class SuggestionItem {
+  final String text;
+  final bool isNew;
+  SuggestionItem(this.text, {this.isNew = false});
+}
+
 class _SuggestionOverlayState extends State<SuggestionOverlay> {
   OverlayEntry? _overlayEntry;
-  List<dynamic> _suggestions = [];
+  List<SuggestionItem> _suggestions = [];
   String _activePrefix = '';
   String _activeQuery = '';
   int _activeStart = -1;
@@ -63,11 +69,14 @@ class _SuggestionOverlayState extends State<SuggestionOverlay> {
     final cursorPosition = selection.baseOffset;
     final textBeforeCursor = text.substring(0, cursorPosition);
 
-    // Find the last @ or # before cursor
+    // Find the last @, # or ! before cursor
     final lastAt = textBeforeCursor.lastIndexOf('@');
     final lastHash = textBeforeCursor.lastIndexOf('#');
+    final lastExcl = textBeforeCursor.lastIndexOf('!');
 
-    final lastTrigger = lastAt > lastHash ? lastAt : lastHash;
+    int lastTrigger = lastAt;
+    if (lastHash > lastTrigger) lastTrigger = lastHash;
+    if (lastExcl > lastTrigger) lastTrigger = lastExcl;
 
     if (lastTrigger != -1) {
       // Check if there's a space between trigger and cursor
@@ -88,10 +97,13 @@ class _SuggestionOverlayState extends State<SuggestionOverlay> {
 
   void _updateSuggestions() {
     final provider = Provider.of<TodoProvider>(context, listen: false);
+    final existingCategories = provider.activeCategories
+        .map((c) => c.toLowerCase())
+        .toSet();
+    final query = _activeQuery.toLowerCase();
 
     if (_activePrefix == '#') {
       final tags = provider.availableTags;
-      final query = _activeQuery.toLowerCase();
       // Exact startsWith first
       final matches = tags
           .where((t) => t.toLowerCase().startsWith(query))
@@ -104,12 +116,14 @@ class _SuggestionOverlayState extends State<SuggestionOverlay> {
                 t.toLowerCase().contains(query),
           )
           .toList();
-      _suggestions = [...matches, ...similar];
+      _suggestions = [
+        ...matches,
+        ...similar,
+      ].map((t) => SuggestionItem(t, isNew: false)).toList();
     } else if (_activePrefix == '@') {
       // Combine dates and people
       final dateSuggestions = ToolParser.getDateSuggestions(_activeQuery);
       final people = provider.availablePeople;
-      final query = _activeQuery.toLowerCase();
 
       final filteredPeople = people
           .where((p) {
@@ -122,7 +136,29 @@ class _SuggestionOverlayState extends State<SuggestionOverlay> {
           .toSet()
           .toList(); // toSet to avoid duplicates if multiple todos have same person tag
 
-      _suggestions = [...dateSuggestions, ...filteredPeople];
+      _suggestions = [
+        ...dateSuggestions.map((d) => SuggestionItem(d, isNew: false)),
+        ...filteredPeople.map((p) => SuggestionItem(p, isNew: false)),
+      ];
+    } else if (_activePrefix == '!') {
+      final commonTypes = [
+        'store',
+        'store.grocery',
+        'grocery',
+        'person',
+        'template',
+        'inventory',
+        'contact',
+      ];
+      _suggestions = commonTypes
+          .where((t) => t.toLowerCase().contains(query))
+          .map(
+            (t) => SuggestionItem(
+              t,
+              isNew: !existingCategories.contains(t.toLowerCase()),
+            ),
+          )
+          .toList();
     }
 
     if (_suggestions.isNotEmpty) {
@@ -166,17 +202,46 @@ class _SuggestionOverlayState extends State<SuggestionOverlay> {
                 itemCount: _suggestions.length,
                 itemBuilder: (context, index) {
                   final suggestion = _suggestions[index];
+                  IconData icon;
+                  if (_activePrefix == '#') {
+                    icon = Icons.label_outline;
+                  } else if (_activePrefix == '!') {
+                    if (suggestion.text == 'person') {
+                      icon = Icons.person_outline;
+                    } else if (suggestion.text == 'template') {
+                      icon = Icons.visibility_outlined;
+                    } else {
+                      icon = Icons.category_outlined;
+                    }
+                  } else {
+                    icon =
+                        ToolParser.getDateSuggestions(
+                          '',
+                        ).contains(suggestion.text)
+                        ? Icons.calendar_today
+                        : Icons.person_outline;
+                  }
                   return ListTile(
                     dense: true,
-                    title: Text(suggestion.toString()),
-                    leading: _activePrefix == '#'
-                        ? const Icon(Icons.label_outline, size: 20)
-                        : (ToolParser.getDateSuggestions(
-                                '',
-                              ).contains(suggestion)
-                              ? const Icon(Icons.calendar_today, size: 20)
-                              : const Icon(Icons.person_outline, size: 20)),
-                    onTap: () => _selectSuggestion(suggestion.toString()),
+                    title: Row(
+                      children: [
+                        Text(suggestion.text),
+                        if (suggestion.isNew)
+                          const Padding(
+                            padding: EdgeInsets.only(left: 4.0),
+                            child: Text(
+                              '(new)',
+                              style: TextStyle(
+                                fontStyle: FontStyle.italic,
+                                color: Colors.white54,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    leading: Icon(icon, size: 20),
+                    onTap: () => _selectSuggestion(suggestion.text),
                   );
                 },
               ),

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import '../providers/todo_provider.dart';
+import 'category_screen.dart';
+import 'home_screen.dart';
+import '../utils/tool_parser.dart';
 
 class DashboardScreen extends StatelessWidget {
-  final Function(int) onNavigate;
+  final Function(Widget) onNavigate;
 
   const DashboardScreen({super.key, required this.onNavigate});
 
@@ -10,8 +15,11 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    final provider = Provider.of<TodoProvider>(context);
+    final categories = provider.activeCategories;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -31,44 +39,58 @@ class DashboardScreen extends StatelessWidget {
             ).textTheme.bodyLarge?.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: 32),
-          GridView.count(
+          GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            children: [
-              _buildNavCard(
+            itemCount: 1 + categories.length, // Todos + dynamic categories
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return _buildNavCard(
+                  context: context,
+                  title: l10n.todos,
+                  icon: Icons.list_alt_rounded,
+                  color: Colors.blueAccent,
+                  onTap: () => onNavigate(const HomeScreen()),
+                );
+              }
+
+              final category = categories[index - 1];
+              IconData icon = Icons.folder_open_rounded;
+              Color color = Colors.blueGrey;
+              bool isType = false;
+
+              if (category.startsWith('store')) {
+                icon = Icons.store_rounded;
+                color = Colors.purpleAccent;
+                isType = true;
+              } else if (category == 'person') {
+                icon = Icons.people_alt_rounded;
+                color = Colors.orangeAccent;
+                isType = true;
+              } else if (category == 'groceries') {
+                icon = Icons.shopping_cart_rounded;
+                color = Colors.greenAccent;
+              }
+
+              return _buildNavCard(
                 context: context,
-                title: l10n.todos,
-                icon: Icons.list_alt_rounded,
-                color: Colors.blueAccent,
-                onTap: () => onNavigate(1), // Index 1 is Todos
-              ),
-              _buildNavCard(
-                context: context,
-                title: l10n.people,
-                icon: Icons.people_alt_rounded,
-                color: Colors.orangeAccent,
-                onTap: () => onNavigate(2), // Index 2 is People
-              ),
-              _buildNavCard(
-                context: context,
-                title: 'Groceries',
-                icon: Icons.shopping_cart_rounded,
-                color: Colors.greenAccent,
-                isPlaceholder: true,
-                onTap: () {},
-              ),
-              _buildNavCard(
-                context: context,
-                title: 'Store',
-                icon: Icons.store_rounded,
-                color: Colors.purpleAccent,
-                isPlaceholder: true,
-                onTap: () {},
-              ),
-            ],
+                title: ToolParser.formatDisplayName(category),
+                icon: icon,
+                color: color,
+                onTap: () => onNavigate(
+                  CategoryScreen(
+                    title: ToolParser.formatDisplayName(category),
+                    tagFilter: isType ? null : category,
+                    typeFilter: isType ? category : null,
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

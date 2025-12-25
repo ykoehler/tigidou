@@ -1,7 +1,8 @@
 {
   "appTitle": "Tigidou",
-  "todos": "Tâches",
-  "people": "Gens",
+  "home": "Accueil",
+  "todos": "Todo",
+  "templates": "Templates",
   "addTodo": "Ajouter une tâche",
   "searchHint": "Rechercher ou ajouter...",
   "newTodoPreview": "Aperçu de la nouvelle tâche",
@@ -9,6 +10,7 @@
   "itsBrand": "C'est ",
   "noTodos": "Aucune tâche. Ajoutez-en une !",
   "addTodoDialogTitle": "Ajouter une tâche",
+  "addTemplateDialogTitle": "Ajouter un template",
   "addTodoHint": "Entrez la tâche (ex: \"Appeler papa @demain @14h\")",
   "cancel": "Annuler",
   "add": "Ajouter",

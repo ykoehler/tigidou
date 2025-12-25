@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
-import 'people_screen.dart';
+import 'templates_screen.dart';
 import 'dashboard_screen.dart';
+import '../widgets/template_builder.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'package:tigidou/l10n/app_localizations.dart';
@@ -25,14 +26,20 @@ class _MainScreenState extends State<MainScreen> {
 
     final List<Widget> widgetOptions = <Widget>[
       DashboardScreen(
-        onNavigate: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+        onNavigate: (widget) {
+          if (widget is HomeScreen) {
+            setState(() => _selectedIndex = 1);
+          } else if (widget is TemplatesScreen) {
+            setState(() => _selectedIndex = 2);
+          } else {
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => widget));
+          }
         },
       ),
       const HomeScreen(),
-      const PeopleScreen(),
+      const TemplatesScreen(),
     ];
 
     return GradientScaffold(
@@ -142,17 +149,17 @@ class _MainScreenState extends State<MainScreen> {
             });
           },
           items: <BottomNavigationBarItem>[
-            const BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_rounded),
-              label: 'Home',
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.dashboard_rounded),
+              label: l10n.home,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.list_alt_rounded),
               label: l10n.todos,
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.people_alt_rounded),
-              label: l10n.people,
+              icon: const Icon(Icons.format_list_bulleted_rounded),
+              label: l10n.templates,
             ),
           ],
         ),
@@ -165,20 +172,17 @@ class _MainScreenState extends State<MainScreen> {
     AppLocalizations l10n,
   ) {
     switch (_selectedIndex) {
-      case 1: // Todos
+      case 2: // Templates
         return FloatingActionButton(
           onPressed: () {
-            _showAddTodoDialog(context, l10n);
+            _showAddTodoDialog(
+              context,
+              l10n,
+              defaultText: '!template {  }',
+              title: l10n.addTemplateDialogTitle,
+            );
           },
-          tooltip: l10n.addTodo,
-          child: const Icon(Icons.add),
-        );
-      case 2: // People
-        return FloatingActionButton(
-          onPressed: () {
-            _showAddTodoDialog(context, l10n, defaultText: '#person ');
-          },
-          tooltip: l10n.addPersonDialogTitle,
+          tooltip: 'Add Template',
           child: const Icon(Icons.add),
         );
       default:
@@ -190,6 +194,7 @@ class _MainScreenState extends State<MainScreen> {
     BuildContext context,
     AppLocalizations l10n, {
     String defaultText = '',
+    String? title,
   }) {
     final TextEditingController controller = TextEditingController(
       text: defaultText,
@@ -197,12 +202,20 @@ class _MainScreenState extends State<MainScreen> {
     showDialog(
       context: context,
       builder: (context) {
+        final isTemplate = defaultText.contains('!template');
         return AlertDialog(
-          title: Text(l10n.addTodoDialogTitle),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(hintText: l10n.addTodoHint),
-            autofocus: true,
+          title: Text(title ?? l10n.addTodoDialogTitle),
+          content: SingleChildScrollView(
+            child: isTemplate
+                ? TemplateBuilder(
+                    initialValue: controller.text,
+                    onChanged: (val) => controller.text = val,
+                  )
+                : TextField(
+                    controller: controller,
+                    decoration: InputDecoration(hintText: l10n.addTodoHint),
+                    autofocus: true,
+                  ),
           ),
           actions: [
             TextButton(
