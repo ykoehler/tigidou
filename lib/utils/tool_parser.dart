@@ -423,11 +423,22 @@ class ToolParser {
     return suggestions.where((s) => s.startsWith(query.toLowerCase())).toList();
   }
 
+  /// Formats a name for display.
+  /// - Extracts the leaf from hierarchical names (e.g., "store.groceries" → "Groceries")
+  /// - Splits CamelCase into words (e.g., "HomeDepot" → "Home Depot")
   static String formatDisplayName(String name) {
     if (name.isEmpty) return name;
     final parts = name.split('.');
     final leaf = parts.last;
     if (leaf.isEmpty) return name;
-    return leaf[0].toUpperCase() + leaf.substring(1);
+
+    // Split CamelCase: insert space before each uppercase letter (except first)
+    final spaced = leaf.replaceAllMapped(
+      RegExp(r'(?<=[a-z])([A-Z])'),
+      (match) => ' ${match.group(1)}',
+    );
+
+    // Capitalize first letter
+    return spaced[0].toUpperCase() + spaced.substring(1);
   }
 }

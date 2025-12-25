@@ -9,7 +9,7 @@ Tigidou uses special prefixes to identify different types of data within your re
 | Prefix | Type | Example | Description |
 | :--- | :--- | :--- | :--- |
 | `!` | Record Type | `IGA !store.groceries` | Identifies the record type. Can include a category. |
-| `@` | Mention | `@IGA` | Links a record to a person or place. |
+| `@` | Mention | `@HomeDepot` | Links a record to a person or place. Use CamelCase for multi-word names. |
 | `#` | Group | `#groceries` | Organizes records and triggers smart lookups. |
 | `$` | Price | `$4.50` | Specifies a monetary value (shortcut). |
 | `@$` | Price | `@$4.50` | Alternative price syntax via @ mention. |
@@ -34,12 +34,12 @@ Use the `!store.CATEGORY` syntax to define a shop's specialty:
 ### 2. Record Prices for that Store
 Add records that mention the store and include a price:
 `Milk @IGA $4.50`
-`Hammer @Home Depot $15.00`
+`Hammer @HomeDepot $15.00`
 
 ### 3. Add Items to your List
 When you add an item with a category tag, Tigidou will find the best price from the linked stores:
 `Milk #groceries` -> Will lookup prices from `@IGA` (linked via `!store.groceries`).
-`Hammer #hardware` -> Will lookup prices from `@Home Depot` (linked via `!store.hardware`).
+`Hammer #hardware` -> Will lookup prices from `@HomeDepot` (linked via `!store.hardware`).
 
 ### Result:
 
