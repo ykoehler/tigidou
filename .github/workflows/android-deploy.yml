@@ -1,0 +1,126 @@
+name: Android Build and Google Play Deploy
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Create google-services.json
+        run: |
+          mkdir -p android/app
+          echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
+
+      - name: Create firebase_options.dart
+        run: |
+          mkdir -p lib
+          echo "${{ secrets.FIREBASE_OPTIONS_DART }}" > lib/firebase_options.dart
+
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release-keystore.jks
+
+      - name: Create key.properties
+        run: |
+          cat > android/key.properties << EOF
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          storeFile=release-keystore.jks
+          EOF
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate localization
+        run: flutter gen-l10n
+
+      - name: Build App Bundle
+        run: flutter build appbundle --release
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Google Play publishing dependencies
+        run: pip install google-api-python-client google-auth
+
+      - name: Upload to Google Play Internal Testing
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python3 << 'EOF'
+          import json
+          import os
+          from google.oauth2 import service_account
+          from googleapiclient.discovery import build
+          from googleapiclient.http import MediaFileUpload
+
+          # Load service account credentials
+          credentials_json = os.environ['GOOGLE_PLAY_SERVICE_ACCOUNT_JSON']
+          credentials_info = json.loads(credentials_json)
+          credentials = service_account.Credentials.from_service_account_info(
+              credentials_info,
+              scopes=['https://www.googleapis.com/auth/androidpublisher']
+          )
+
+          # Build the service
+          service = build('androidpublisher', 'v3', credentials=credentials)
+          package_name = 'com.yannickkoehler.tigidou'
+
+          # Create an edit
+          edit = service.edits().insert(body={}, packageName=package_name).execute()
+          edit_id = edit['id']
+
+          # Upload the AAB
+          aab_path = 'build/app/outputs/bundle/release/app-release.aab'
+          media = MediaFileUpload(aab_path, mimetype='application/octet-stream', resumable=True)
+          
+          bundle = service.edits().bundles().upload(
+              packageName=package_name,
+              editId=edit_id,
+              media_body=media
+          ).execute()
+
+          print(f"Bundle uploaded: version code {bundle['versionCode']}")
+
+          # Assign to internal testing track
+          track_body = {
+              'releases': [{
+                  'versionCodes': [str(bundle['versionCode'])],
+                  'status': 'completed'
+              }]
+          }
+
+          service.edits().tracks().update(
+              packageName=package_name,
+              editId=edit_id,
+              track='internal',
+              body=track_body
+          ).execute()
+
+          # Commit the edit
+          service.edits().commit(packageName=package_name, editId=edit_id).execute()
+          print("Successfully published to internal testing track!")
+          EOF
